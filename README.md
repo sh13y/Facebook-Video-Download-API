@@ -1,4 +1,3 @@
-````markdown
 # 🎥 Facebook Video Downloader API
 
 A production-ready REST API for downloading Facebook videos built with FastAPI and yt-dlp.
