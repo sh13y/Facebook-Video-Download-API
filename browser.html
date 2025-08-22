@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Video Downloader - Browser Usage</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .header {
+            padding: 2rem 1rem;
+            background-color: #4267B2; /* Facebook blue */
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-radius: 0.3rem;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.3rem;
+            overflow-x: auto;
+        }
+        .card {
+            margin-bottom: 2rem;
+        }
+        .footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="bi bi-facebook me-2"></i> Facebook Video Downloader</h1>
+            <p class="lead">Browser-based Interface for Easy Video Downloads</p>
+            <div class="mt-2">
+                <span class="badge bg-success">Reels</span>
+                <span class="badge bg-primary">Share Links</span>
+                <span class="badge bg-info">Watch Videos</span>
+                <span class="badge bg-secondary">Posts</span>
+                <span class="badge bg-warning text-dark">Stories</span>
+            </div>
+        </div>
+
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <h4><i class="bi bi-info-circle"></i> Quick Guide</h4>
+            <ol>
+                <li>Copy a Facebook video URL from any browser</li>
+                <li>Paste it in the form below</li>
+                <li>Select your preferred video quality</li>
+                <li>Click "Get Download Link"</li>
+                <li>Use the download button or copy the link</li>
+            </ol>
+            <p class="mb-0"><strong>Supported URL formats:</strong> facebook.com/watch/, /videos/, /video.php, /reel/, /share/v/, /share/r/</p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Download Facebook Video</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="downloadForm" action="javascript:void(0);">
+                            <div class="mb-3">
+                                <label for="videoUrl" class="form-label">Facebook Video URL</label>
+                                <input type="text" class="form-control" id="videoUrl" placeholder="https://www.facebook.com/share/v/1C6EwSc49J/" required>
+                                <div class="form-text">
+                                    Supported formats include: watch videos, reels, share/v links, share/r links, video.php, fb.watch, posts with videos
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="quality" class="form-label">Video Quality</label>
+                                <select class="form-select" id="quality">
+                                    <option value="best" selected>Best Quality</option>
+                                    <option value="1080p">1080p</option>
+                                    <option value="720p">720p</option>
+                                    <option value="480p">480p</option>
+                                    <option value="360p">360p</option>
+                                    <option value="worst">Lowest Quality</option>
+                                </select>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Get Download Link</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card d-none" id="resultCard">
+                    <div class="card-header">
+                        <h2>Download Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="resultContent">
+                            <!-- Results will be shown here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h2><i class="bi bi-link-45deg"></i> Direct Browser URI Access</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>While most API endpoints require a POST request with a JSON body, you can access these endpoints directly in your browser:</p>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-success text-white">
+                                        <h4><i class="bi bi-heart-pulse"></i> Health Check</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Open this URL in your browser to check if the API is running:</p>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="healthUrl" value="http://localhost:8000/health" readonly>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard(document.getElementById('healthUrl').value)">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                        <div class="d-grid gap-2 mt-3">
+                                            <a id="healthUrlLink" href="http://localhost:8000/health" target="_blank" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-box-arrow-up-right"></i> Open Health Check
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-info text-white">
+                                        <h4><i class="bi bi-gear"></i> Quality Options</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Open this URL to see available video quality options:</p>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="qualitiesUrl" value="http://localhost:8000/qualities" readonly>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard(document.getElementById('qualitiesUrl').value)">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                        <div class="d-grid gap-2 mt-3">
+                                            <a id="qualitiesUrlLink" href="http://localhost:8000/qualities" target="_blank" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-box-arrow-up-right"></i> View Quality Options
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Note:</strong> The main download and info endpoints use POST requests with JSON bodies, which cannot be directly accessed via a browser URL. Use the form above instead.
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-lightbulb-fill me-2"></i>
+                            <strong>Tip:</strong> For direct access with curl or other tools, use:
+                            <pre><code>curl -X POST "http://localhost:8000/download" -H "Content-Type: application/json" -d '{"url": "https://www.facebook.com/share/v/1AxJksY6wx/", "quality": "best"}'</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Facebook Video Downloader API &copy; 2025</p>
+            <p class="text-muted">This tool is for educational purposes. Use responsibly and respect Facebook's terms of service.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Function to handle downloads directly - specialized for Facebook videos
+        function directFacebookDownload(url, filename) {
+            console.log('Direct Facebook download:', url, filename);
+            
+            // Create an anchor with download attributes
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename || 'facebook_video.mp4';
+            a.style.display = 'none';
+            
+            // Append to body and click
+            document.body.appendChild(a);
+            a.click();
+            
+            // Remove after short delay
+            setTimeout(() => {
+                document.body.removeChild(a);
+            }, 100);
+            
+            return false;
+        }
+        
+        // Function to handle downloads
+        function startDownload(url, filename) {
+            try {
+                console.log('Starting download:', url, filename);
+                
+                // For Facebook CDN URLs, use direct download
+                if (url.includes('fbcdn.net') || url.includes('xx.fbcdn.net')) {
+                    return directFacebookDownload(url, filename);
+                }
+                
+                showToast('Download Started', 'Preparing your download...', 'info');
+                
+                // Create iframe to force download
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = url;
+                iframe.onload = function() {
+                    setTimeout(() => {
+                        document.body.removeChild(iframe);
+                    }, 1000);
+                };
+                document.body.appendChild(iframe);
+                
+                // Also try direct download link
+                const downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = filename || 'facebook_video.mp4';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(downloadLink);
+                }, 100);
+                
+                return false;
+            } catch (error) {
+                console.error('Download function error:', error);
+                showToast('Error', 'Download failed. Try right-clicking and "Save link as" instead.', 'danger');
+                
+                // Open URL in current tab as last resort
+                window.location.href = url;
+                return false;
+            }
+        }
+        
+        // Show detailed download help
+        function showDownloadHelp() {
+            // Create modal element
+            const modalDiv = document.createElement('div');
+            modalDiv.className = 'modal fade';
+            modalDiv.id = 'downloadHelpModal';
+            modalDiv.setAttribute('tabindex', '-1');
+            modalDiv.setAttribute('aria-labelledby', 'downloadHelpModalLabel');
+            modalDiv.setAttribute('aria-hidden', 'true');
+            
+            modalDiv.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="downloadHelpModalLabel">
+                                <i class="bi bi-question-circle me-2"></i> Facebook Video Download Help
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-warning">
+                                <strong>Why don't videos download immediately?</strong>
+                                <p>Facebook uses special techniques to prevent automatic downloading. This tool tries multiple methods to bypass these limitations.</p>
+                            </div>
+                            
+                            <h5><i class="bi bi-list-ol me-2"></i> Try these methods in order:</h5>
+                            
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">Method 1: Multiple Click Attempts</div>
+                                <div class="card-body">
+                                    <p>Click the "Download Best Quality" button <strong>several times</strong>. The system will try different download methods each time.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">Method 2: Right-Click Save As</div>
+                                <div class="card-body">
+                                    <p>Right-click on the "Download Best Quality" button and select "Save Link As" or "Download Link As" (varies by browser).</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">Method 3: Browser Download</div>
+                                <div class="card-body">
+                                    <p>Click "Open in New Tab", then when the video loads in the new tab:</p>
+                                    <ul>
+                                        <li>Right-click on the video and select "Save Video As"</li>
+                                        <li>Or use your browser's built-in download feature</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">Method 4: External Downloader</div>
+                                <div class="card-body">
+                                    <p>Copy the video URL and use an external download manager or video downloader tool.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info mt-3">
+                                <strong>Note:</strong> Some videos may have download restrictions due to Facebook's privacy settings or content protection.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modalDiv);
+            
+            // Initialize and show the modal
+            const modal = new bootstrap.Modal(document.getElementById('downloadHelpModal'));
+            modal.show();
+            
+            // Clean up when the modal is hidden
+            document.getElementById('downloadHelpModal').addEventListener('hidden.bs.modal', function () {
+                document.body.removeChild(modalDiv);
+            });
+        }
+        
+        // Helper function to show toast notifications
+        function showToast(title, message, type = 'success') {
+            // Create toast container if it doesn't exist
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toastContainer';
+                toastContainer.style.position = 'fixed';
+                toastContainer.style.top = '20px';
+                toastContainer.style.right = '20px';
+                toastContainer.style.zIndex = '1050';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastElement = document.createElement('div');
+            toastElement.className = 'toast show';
+            toastElement.setAttribute('role', 'alert');
+            toastElement.setAttribute('aria-live', 'assertive');
+            toastElement.setAttribute('aria-atomic', 'true');
+            
+            toastElement.innerHTML = `
+                <div class="toast-header bg-${type} ${type === 'success' || type === 'danger' ? 'text-white' : ''}">
+                    <i class="bi bi-${type === 'success' ? 'clipboard-check' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                    <strong class="me-auto">${title}</strong>
+                    <button type="button" class="btn-close ${type === 'success' || type === 'danger' ? 'btn-close-white' : ''}" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            `;
+            
+            toastContainer.appendChild(toastElement);
+            
+            // Remove the toast after 3 seconds
+            setTimeout(() => {
+                if (toastElement && toastElement.parentNode) {
+                    toastElement.parentNode.removeChild(toastElement);
+                }
+            }, 3000);
+        }
+            
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            // Check if clipboard API is supported
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(
+                    function() {
+                        showToast('Copied!', 'Download link copied to clipboard', 'success');
+                    },
+                    function() {
+                        // Fallback method
+                        fallbackCopy(text);
+                    }
+                );
+            } else {
+                // Fallback for browsers that don't support the Clipboard API
+                fallbackCopy(text);
+            }
+        }
+        
+        // Fallback copy method using a hidden textarea
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';  // Prevent scrolling to bottom
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast('Copied!', 'Download link copied to clipboard', 'success');
+                } else {
+                    showToast('Copy Failed', 'Please try selecting and copying manually', 'warning');
+                }
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+                showToast('Copy Failed', 'Please try selecting and copying manually', 'warning');
+            }
+            
+            document.body.removeChild(textarea);
+        }
+        
+        // Function to format duration
+        function formatDuration(seconds) {
+            if (!seconds) return 'Unknown';
+            
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.round(seconds % 60);
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Function to format numbers
+        function formatNumber(num) {
+            if (!num) return 'Unknown';
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        // Function to format file size
+        function formatFileSize(bytes) {
+            if (!bytes) return 'Unknown';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let i = 0;
+            let size = parseInt(bytes, 10) || 0;
+            
+            while (size >= 1024 && i < units.length - 1) {
+                size /= 1024;
+                i++;
+            }
+            
+            return `${size.toFixed(1)} ${units[i]}`;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // API Base URL Selection
+            const apiBaseUrlOptions = document.createElement('div');
+            apiBaseUrlOptions.className = 'mb-4';
+            apiBaseUrlOptions.innerHTML = `
+                <label for="apiBaseUrl" class="form-label">API Server URL</label>
+                <select class="form-select" id="apiBaseUrl">
+                    <option value="http://localhost:8000" selected>Local Server (http://localhost:8000)</option>
+                    <option value="http://127.0.0.1:8000">Local Server (http://127.0.0.1:8000)</option>
+                    <option value="custom">Custom URL...</option>
+                </select>
+                <div id="customUrlContainer" class="mt-2 d-none">
+                    <input type="text" class="form-control" id="customApiUrl" placeholder="https://your-api-domain.com">
+                </div>
+            `;
+            
+            // Insert API URL selection before the video URL field
+            const videoUrlField = document.getElementById('videoUrl').parentNode;
+            videoUrlField.parentNode.insertBefore(apiBaseUrlOptions, videoUrlField);
+            
+            // Handle custom URL option
+            document.getElementById('apiBaseUrl').addEventListener('change', function() {
+                const customUrlContainer = document.getElementById('customUrlContainer');
+                if (this.value === 'custom') {
+                    customUrlContainer.classList.remove('d-none');
+                } else {
+                    customUrlContainer.classList.add('d-none');
+                }
+                updateExampleUrls();
+            });
+            
+            document.getElementById('customApiUrl').addEventListener('input', function() {
+                updateExampleUrls();
+            });
+            
+            // Function to get the current base URL
+            function getBaseUrl() {
+                const selector = document.getElementById('apiBaseUrl');
+                if (selector.value === 'custom') {
+                    return document.getElementById('customApiUrl').value.trim() || 'http://localhost:8000';
+                }
+                return selector.value;
+            }
+            
+            // Update example URLs
+            function updateExampleUrls() {
+                const baseUrl = getBaseUrl();
+                // Update health URL
+                const healthUrl = baseUrl + '/health';
+                document.getElementById('healthUrl').value = healthUrl;
+                document.getElementById('healthUrlLink').href = healthUrl;
+                
+                // Update qualities URL
+                const qualitiesUrl = baseUrl + '/qualities';
+                document.getElementById('qualitiesUrl').value = qualitiesUrl;
+                document.getElementById('qualitiesUrlLink').href = qualitiesUrl;
+            }
+            
+            updateExampleUrls();
+            
+            // Debug function to help troubleshoot
+            window.onerror = function(message, source, lineno, colno, error) {
+                console.error('Error:', message, 'at', source, lineno, colno, error);
+                showToast('JavaScript Error', message, 'danger');
+                return false;
+            };
+            
+            // Form submission handler
+            document.getElementById('downloadForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const videoUrl = document.getElementById('videoUrl').value;
+                const quality = document.getElementById('quality').value;
+                const resultCard = document.getElementById('resultCard');
+                const resultContent = document.getElementById('resultContent');
+                
+                // Show loading state with progress message
+                resultContent.innerHTML = `
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Processing video...</p>
+                        <p class="text-muted small">This may take a moment depending on the video size and Facebook's response time</p>
+                        <div class="progress mt-3">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                `;
+                resultCard.classList.remove('d-none');
+                
+                // Scroll to the result card
+                resultCard.scrollIntoView({ behavior: 'smooth' });
+                
+                // Display debug info
+                console.log('Making API call to:', getBaseUrl() + '/download');
+                console.log('With data:', { url: videoUrl, quality: quality });
+                
+                // Create controller for abort
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+                
+                // Make API call
+                fetch(getBaseUrl() + '/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: videoUrl,
+                        quality: quality
+                    }),
+                    signal: controller.signal,
+                    mode: 'cors', // Explicitly request CORS mode
+                    credentials: 'same-origin' // Handle cookies if needed
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Success response
+                        let html = `
+                            <div class="alert alert-success mb-4">
+                                <i class="bi bi-check-circle-fill"></i> Video retrieved successfully!
+                            </div>
+                            <h3>${data.video_info.title || 'Facebook Video'}</h3>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <img src="${data.video_info.thumbnail || 'https://via.placeholder.com/320x180?text=No+Thumbnail'}" class="img-fluid rounded mb-3" alt="Video thumbnail">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <p><strong>Duration:</strong> ${formatDuration(data.video_info.duration)}</p>
+                                            <p><strong>Uploader:</strong> ${data.video_info.uploader || 'Unknown'}</p>
+                                            <p><strong>Views:</strong> ${formatNumber(data.video_info.view_count)}</p>
+                                            <p><strong>Original URL:</strong> <a href="${videoUrl}" target="_blank">${videoUrl.substring(0, 50)}${videoUrl.length > 50 ? '...' : ''}</a></p>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid gap-2 mt-3">
+                                        <a href="${data.download_url}" class="btn btn-lg btn-success" id="mainDownloadBtn" download="${data.video_info.title || 'facebook_video'}.mp4"
+                                           onclick="startDownload('${data.download_url}', '${data.video_info.title || 'facebook_video'}.mp4'); return false;">
+                                            <i class="bi bi-download"></i> Download Best Quality
+                                        </a>
+                                        <div class="btn-group mt-2">
+                                            <button class="btn btn-outline-primary" onclick="copyToClipboard('${data.download_url}')">
+                                                <i class="bi bi-clipboard"></i> Copy Download Link
+                                            </button>
+                                            <a href="${data.download_url}" class="btn btn-outline-secondary" target="_blank">
+                                                <i class="bi bi-box-arrow-up-right"></i> Open in New Tab
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info mt-3">
+                                        <i class="bi bi-info-circle me-2"></i> <strong>Download Issues?</strong> If the download doesn't start automatically:
+                                        <ol class="mb-0 mt-2">
+                                            <li>Click "Download Best Quality" again - the system will try multiple methods</li>
+                                            <li>Use the "Open in New Tab" option and save from browser</li>
+                                            <li>Right-click on "Download Best Quality" and select "Save Link As"</li>
+                                            <li>Copy the link and use a download manager or video downloader tool</li>
+                                        </ol>
+                                        <div class="text-center mt-2">
+                                            <button class="btn btn-sm btn-warning" onclick="showDownloadHelp()">
+                                                <i class="bi bi-question-circle"></i> Need More Help?
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h4 class="mt-4">Available Formats</h4>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Quality</th>
+                                            <th>Format</th>
+                                            <th>Size</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                        `;
+                        
+                        data.available_formats.forEach(format => {
+                            html += `
+                                <tr>
+                                    <td><span class="badge bg-${format.quality.includes('1080') ? 'success' : format.quality.includes('720') ? 'primary' : 'secondary'}">${format.quality}</span></td>
+                                    <td>${format.ext.toUpperCase()}</td>
+                                    <td>${format.filesize ? formatFileSize(format.filesize) : 'Unknown'}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="${format.url}" class="btn btn-sm btn-outline-primary" download="${format.quality}_${format.ext}.mp4"
+                                               onclick="startDownload('${format.url}', '${format.quality}_${format.ext}.mp4'); return false;">
+                                                <i class="bi bi-download"></i> Download
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('${format.url}')">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            <a href="${format.url}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        
+                        html += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                        
+                        resultContent.innerHTML = html;
+                    } else {
+                        // Error response
+                        let errorMessage = data.message || 'Failed to process video.';
+                        let errorHint = '';
+                        
+                        // Provide helpful suggestions based on error type
+                        if (errorMessage.includes('No video formats found')) {
+                            errorHint = `
+                                <div class="mt-3">
+                                    <h5>Possible solutions:</h5>
+                                    <ul>
+                                        <li>Make sure the URL is a valid Facebook video URL</li>
+                                        <li>Try copying the URL directly from the Facebook address bar</li>
+                                        <li>The video might be private or restricted</li>
+                                        <li>Facebook may have changed their URL format - please report this</li>
+                                    </ul>
+                                </div>
+                            `;
+                        } else if (errorMessage.includes('timeout') || errorMessage.includes('connection')) {
+                            errorHint = `
+                                <div class="mt-3">
+                                    <h5>Possible solutions:</h5>
+                                    <ul>
+                                        <li>The video might be too large</li>
+                                        <li>Your internet connection may be unstable</li>
+                                        <li>Try again later when server load is lower</li>
+                                        <li>Try using a different quality setting</li>
+                                    </ul>
+                                </div>
+                            `;
+                        }
+                        
+                        resultContent.innerHTML = `
+                            <div class="alert alert-danger" role="alert">
+                                <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Error!</h4>
+                                <p>${errorMessage}</p>
+                                ${data.error_code ? `<p><strong>Error code:</strong> ${data.error_code}</p>` : ''}
+                                ${errorHint}
+                            </div>
+                            <button class="btn btn-primary mt-3" onclick="document.getElementById('downloadForm').scrollIntoView({behavior: 'smooth'})">
+                                <i class="bi bi-arrow-left-circle"></i> Back to Form
+                            </button>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    // Clear the timeout since we're handling the error now
+                    clearTimeout(timeoutId);
+                    
+                    console.error('API request error:', error);
+                    let errorMessage = error.message || 'Unknown error';
+                    let connectionHint = '';
+                    
+                    if (error.name === 'AbortError') {
+                        errorMessage = 'Request timed out after 60 seconds';
+                        connectionHint = `
+                            <p>The request timed out. This could be because:</p>
+                            <ul>
+                                <li>The server is taking too long to process the video</li>
+                                <li>The video is too large</li>
+                                <li>The server might be under high load</li>
+                            </ul>
+                            <p>Try again later or with a different video.</p>
+                        `;
+                    } else if (errorMessage.includes('timeout')) {
+                        connectionHint = `
+                            <p>The request timed out. This could be because:</p>
+                            <ul>
+                                <li>The server is taking too long to process the video</li>
+                                <li>The video is too large</li>
+                                <li>The server might be under high load</li>
+                            </ul>
+                            <p>Try again later or with a different video.</p>
+                        `;
+                    }
+                    
+                    // Show debugging info
+                    const debugInfo = `
+                        <div class="collapse mt-3" id="debugInfo">
+                            <div class="card card-body bg-light">
+                                <h6>Debug Information:</h6>
+                                <pre class="text-muted small">${JSON.stringify({
+                                    url: videoUrl,
+                                    quality: quality,
+                                    apiUrl: getBaseUrl() + '/download',
+                                    errorName: error.name,
+                                    errorMessage: error.message
+                                }, null, 2)}</pre>
+                            </div>
+                        </div>
+                    `;
+                    
+                    resultContent.innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            <h4 class="alert-heading"><i class="bi bi-x-circle-fill"></i> Connection Error</h4>
+                            <p>Failed to connect to the API server. Please check if the server is running and accessible.</p>
+                            <p><strong>Error details:</strong> ${errorMessage}</p>
+                            ${connectionHint}
+                        </div>
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Troubleshooting Steps</h5>
+                                <ol>
+                                    <li>Check that the API server is running (typically on port 8000)</li>
+                                    <li>Verify your API base URL selection above</li>
+                                    <li>Try restarting the API server</li>
+                                    <li>Check if your network allows the connection</li>
+                                </ol>
+                                <button class="btn btn-outline-secondary btn-sm mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#debugInfo">
+                                    <i class="bi bi-bug"></i> Show Debug Info
+                                </button>
+                                ${debugInfo}
+                            </div>
+                        </div>
+                        <button class="btn btn-primary mt-3" onclick="document.getElementById('downloadForm').scrollIntoView({behavior: 'smooth'})">
+                            <i class="bi bi-arrow-left-circle"></i> Back to Form
+                        </button>
+                    `;
+                });
+            });
+            
+            // Helper functions
+            function formatDuration(seconds) {
+                if (!seconds) return 'Unknown';
+                
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = Math.round(seconds % 60);
+                return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+            
+            function formatNumber(num) {
+                if (!num) return 'Unknown';
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            
+            function formatFileSize(bytes) {
+                if (!bytes) return 'Unknown';
+                const units = ['B', 'KB', 'MB', 'GB'];
+                let i = 0;
+                let size = parseInt(bytes, 10) || 0;
+                
+                while (size >= 1024 && i < units.length - 1) {
+                    size /= 1024;
+                    i++;
+                }
+                
+                return `${size.toFixed(1)} ${units[i]}`;
+            }
+            
+            // Function to handle downloads
+            function startDownload(url, filename) {
+                try {
+                    console.log('Starting download:', url, filename);
+                    showToast('Download Started', 'Preparing your download...', 'info');
+                    
+                    // For Facebook video URLs, try several methods
+                    tryDownloadMethods(url, filename, 0);
+                    
+                } catch (error) {
+                    console.error('Download function error:', error);
+                    showToast('Error', 'Download failed. Try copying the link instead.', 'danger');
+                    
+                    // Last resort fallback - simple download
+                    forceDownload(url, filename);
+                }
+                
+                return false; // Prevent default anchor behavior
+            }
+            
+            // Try different download methods in sequence
+            function tryDownloadMethods(url, filename, methodIndex) {
+                // List of methods to try in order
+                const methods = [
+                    downloadUsingFetch,
+                    downloadUsingIframe,
+                    downloadUsingDirectLink,
+                    forceDownload
+                ];
+                
+                if (methodIndex >= methods.length) {
+                    // All methods failed
+                    showToast('Download Failed', 'Please try the "Open in New Tab" option instead', 'danger');
+                    return;
+                }
+                
+                // Try the current method
+                methods[methodIndex](url, filename, (success) => {
+                    if (!success) {
+                        // If it fails, try the next method
+                        console.log(`Method ${methodIndex} failed, trying next method`);
+                        tryDownloadMethods(url, filename, methodIndex + 1);
+                    }
+                });
+            }
+            
+            // Method 1: Using Fetch API to download via blob
+            function downloadUsingFetch(url, filename, callback) {
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        // Create object URL for the blob
+                        const blobUrl = URL.createObjectURL(blob);
+                        
+                        // Create hidden download link
+                        const downloadLink = document.createElement('a');
+                        downloadLink.style.display = 'none';
+                        downloadLink.href = blobUrl;
+                        downloadLink.download = filename || 'facebook_video.mp4';
+                        
+                        // Append to document, trigger click, and clean up
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        
+                        // Clean up
+                        setTimeout(() => {
+                            document.body.removeChild(downloadLink);
+                            URL.revokeObjectURL(blobUrl);
+                            showToast('Success', 'Download started successfully!', 'success');
+                            callback(true);
+                        }, 100);
+                    })
+                    .catch(error => {
+                        console.error('Fetch download error:', error);
+                        callback(false);
+                    });
+            }
+            
+            // Method 2: Using iframe to download
+            function downloadUsingIframe(url, filename, callback) {
+                try {
+                    showToast('Trying alternative method...', 'Please wait', 'info');
+                    
+                    // Create an iframe
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    document.body.appendChild(iframe);
+                    
+                    // Create a form in the iframe that will force download
+                    const iframeDoc = iframe.contentWindow.document;
+                    const form = iframeDoc.createElement('form');
+                    form.method = 'GET';
+                    form.action = url;
+                    
+                    // Add a download attribute
+                    const downloadInput = iframeDoc.createElement('input');
+                    downloadInput.type = 'hidden';
+                    downloadInput.name = 'download';
+                    downloadInput.value = filename;
+                    form.appendChild(downloadInput);
+                    
+                    iframeDoc.body.appendChild(form);
+                    form.submit();
+                    
+                    // Clean up after a delay
+                    setTimeout(() => {
+                        document.body.removeChild(iframe);
+                        showToast('Download Initiated', 'Check your downloads folder', 'success');
+                        callback(true);
+                    }, 2000);
+                } catch (error) {
+                    console.error('Iframe download error:', error);
+                    callback(false);
+                }
+            }
+            
+            // Method 3: Direct link with download attribute
+            function downloadUsingDirectLink(url, filename, callback) {
+                try {
+                    showToast('Trying direct download...', 'Please wait', 'info');
+                    
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = url;
+                    downloadLink.download = filename || 'facebook_video.mp4';
+                    downloadLink.rel = 'noopener noreferrer';
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(downloadLink);
+                        callback(true);
+                    }, 1000);
+                } catch (error) {
+                    console.error('Direct link download error:', error);
+                    callback(false);
+                }
+            }
+            
+            // Method 4: Force download through automatic click
+            function forceDownload(url, filename) {
+                try {
+                    showToast('Final download attempt...', 'Please wait', 'warning');
+                    
+                    // Create and click link with both download attribute and click simulation
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = url;
+                    downloadLink.setAttribute('download', filename || 'facebook_video.mp4');
+                    downloadLink.setAttribute('target', '_self');
+                    downloadLink.style.display = 'none';
+                    document.body.appendChild(downloadLink);
+                    
+                    // Try to force the download with a MouseEvent
+                    const clickEvent = new MouseEvent('click', {
+                        view: window,
+                        bubbles: true,
+                        cancelable: false
+                    });
+                    downloadLink.dispatchEvent(clickEvent);
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(downloadLink);
+                    }, 1000);
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Force download error:', error);
+                    return false;
+                }
+            }
+            
+            // Copy to clipboard function
+            function copyToClipboard(text) {
+                // Check if clipboard API is supported
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(
+                        function() {
+                            showToast('Copied!', 'Download link copied to clipboard', 'success');
+                        },
+                        function() {
+                            // Fallback method
+                            fallbackCopy(text);
+                        }
+                    );
+                } else {
+                    // Fallback for browsers that don't support the Clipboard API
+                    fallbackCopy(text);
+                }
+            }
+            
+            // Fallback copy method using a hidden textarea
+            function fallbackCopy(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';  // Prevent scrolling to bottom
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        showToast('Copied!', 'Download link copied to clipboard', 'success');
+                    } else {
+                        showToast('Copy Failed', 'Please try selecting and copying manually', 'warning');
+                    }
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                    showToast('Copy Failed', 'Please try selecting and copying manually', 'warning');
+                }
+                
+                document.body.removeChild(textarea);
+            }
+            
+            // Show detailed download help
+            function showDownloadHelp() {
+                // Create modal element
+                const modalDiv = document.createElement('div');
+                modalDiv.className = 'modal fade';
+                modalDiv.id = 'downloadHelpModal';
+                modalDiv.setAttribute('tabindex', '-1');
+                modalDiv.setAttribute('aria-labelledby', 'downloadHelpModalLabel');
+                modalDiv.setAttribute('aria-hidden', 'true');
+                
+                modalDiv.innerHTML = `
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title" id="downloadHelpModalLabel">
+                                    <i class="bi bi-question-circle me-2"></i> Facebook Video Download Help
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning">
+                                    <strong>Why don't videos download immediately?</strong>
+                                    <p>Facebook uses special techniques to prevent automatic downloading. This tool tries multiple methods to bypass these limitations.</p>
+                                </div>
+                                
+                                <h5><i class="bi bi-list-ol me-2"></i> Try these methods in order:</h5>
+                                
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">Method 1: Multiple Click Attempts</div>
+                                    <div class="card-body">
+                                        <p>Click the "Download Best Quality" button <strong>several times</strong>. The system will try different download methods each time.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">Method 2: Right-Click Save As</div>
+                                    <div class="card-body">
+                                        <p>Right-click on the "Download Best Quality" button and select "Save Link As" or "Download Link As" (varies by browser).</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">Method 3: Browser Download</div>
+                                    <div class="card-body">
+                                        <p>Click "Open in New Tab", then when the video loads in the new tab:</p>
+                                        <ul>
+                                            <li>Right-click on the video and select "Save Video As"</li>
+                                            <li>Or use your browser's built-in download feature</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">Method 4: External Downloader</div>
+                                    <div class="card-body">
+                                        <p>Copy the video URL and use an external download manager or video downloader tool.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-info mt-3">
+                                    <strong>Note:</strong> Some videos may have download restrictions due to Facebook's privacy settings or content protection.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modalDiv);
+                
+                // Initialize and show the modal
+                const modal = new bootstrap.Modal(document.getElementById('downloadHelpModal'));
+                modal.show();
+                
+                // Clean up when the modal is hidden
+                document.getElementById('downloadHelpModal').addEventListener('hidden.bs.modal', function () {
+                    document.body.removeChild(modalDiv);
+                });
+            }
+            
+            // Helper function to show toast notifications
+            function showToast(title, message, type = 'success') {
+                // Create toast container if it doesn't exist
+                let toastContainer = document.getElementById('toastContainer');
+                if (!toastContainer) {
+                    toastContainer = document.createElement('div');
+                    toastContainer.id = 'toastContainer';
+                    toastContainer.style.position = 'fixed';
+                    toastContainer.style.top = '20px';
+                    toastContainer.style.right = '20px';
+                    toastContainer.style.zIndex = '1050';
+                    document.body.appendChild(toastContainer);
+                }
+                
+                const toastElement = document.createElement('div');
+                toastElement.className = 'toast show';
+                toastElement.setAttribute('role', 'alert');
+                toastElement.setAttribute('aria-live', 'assertive');
+                toastElement.setAttribute('aria-atomic', 'true');
+                
+                toastElement.innerHTML = `
+                    <div class="toast-header bg-${type} ${type === 'success' || type === 'danger' ? 'text-white' : ''}">
+                        <i class="bi bi-${type === 'success' ? 'clipboard-check' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                        <strong class="me-auto">${title}</strong>
+                        <button type="button" class="btn-close ${type === 'success' || type === 'danger' ? 'btn-close-white' : ''}" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                `;
+                
+                toastContainer.appendChild(toastElement);
+                
+                // Remove the toast after 3 seconds
+                setTimeout(() => {
+                    if (toastElement && toastElement.parentNode) {
+                        toastElement.parentNode.removeChild(toastElement);
+                    }
+                }, 3000);
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

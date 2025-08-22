@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Video Downloader API Documentation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .header {
+            padding: 2rem 1rem;
+            background-color: #4267B2; /* Facebook blue */
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-radius: 0.3rem;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.3rem;
+            overflow-x: auto;
+        }
+        .endpoint {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.3rem;
+            background-color: #fff;
+        }
+        .method {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+            border-radius: 0.25rem;
+            margin-right: 0.5rem;
+        }
+        .method-post {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .method-get {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .table-responsive {
+            margin-bottom: 1rem;
+        }
+        .subtitle {
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+        }
+        .version-badge {
+            background-color: #17a2b8;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+        .footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Facebook Video Downloader API</h1>
+            <p class="lead">A high-performance REST API for downloading Facebook videos</p>
+            <span class="version-badge">v1.0.0</span>
+            <div class="mt-3">
+                <a href="browser.html" class="btn btn-light">Try Browser Interface</a>
+                <a href="direct.html" class="btn btn-light ms-2">Try Direct URI Access</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="sticky-top pt-3">
+                    <h5>Contents</h5>
+                    <div class="nav flex-column">
+                        <a class="nav-link" href="#introduction">Introduction</a>
+                        <a class="nav-link" href="#authentication">Authentication</a>
+                        <a class="nav-link" href="#rate-limiting">Rate Limiting</a>
+                        <a class="nav-link" href="#endpoints">API Endpoints</a>
+                        <a class="nav-link ms-3" href="#download-endpoint">Download Video</a>
+                        <a class="nav-link ms-3" href="#info-endpoint">Get Video Info</a>
+                        <a class="nav-link ms-3" href="#qualities-endpoint">Get Quality Options</a>
+                        <a class="nav-link ms-3" href="#health-endpoint">Health Check</a>
+                        <a class="nav-link" href="#error-handling">Error Handling</a>
+                        <a class="nav-link" href="#url-formats">Supported URL Formats</a>
+                        <a class="nav-link" href="#examples">Code Examples</a>
+                        <a class="nav-link" href="#browser-access">Browser Access</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <section id="introduction" class="mb-5">
+                    <h2>Introduction</h2>
+                    <p>The Facebook Video Downloader API allows you to extract information and download links from public Facebook videos. This service supports various Facebook video URL formats and provides multiple quality options for video downloads.</p>
+                    <p>The API is built with FastAPI and uses yt-dlp for video extraction, ensuring high performance and reliability.</p>
+                </section>
+
+                <section id="authentication" class="mb-5">
+                    <h2>Authentication</h2>
+                    <p>Currently, the API operates without authentication requirements. However, rate limiting is enforced to prevent abuse.</p>
+                </section>
+
+                <section id="rate-limiting" class="mb-5">
+                    <h2>Rate Limiting</h2>
+                    <p>To ensure service stability, the API enforces rate limiting:</p>
+                    <ul>
+                        <li>Default: <strong>10 requests per 60 seconds</strong> per IP address</li>
+                        <li>When rate limit is exceeded, the API returns a <code>429 Too Many Requests</code> status code</li>
+                    </ul>
+                    <p>Rate limits can be configured via environment variables (<code>RATE_LIMIT_REQUESTS</code> and <code>RATE_LIMIT_WINDOW</code>).</p>
+                </section>
+
+                <section id="endpoints" class="mb-5">
+                    <h2>API Endpoints</h2>
+                    <p>The API provides the following endpoints:</p>
+
+                    <div id="download-endpoint" class="endpoint">
+                        <h3><span class="method method-post">POST</span> /download</h3>
+                        <p>Download Facebook video and get direct download link.</p>
+
+                        <h4>Request</h4>
+                        <pre><code>{
+  "url": "https://www.facebook.com/share/v/1C6EwSc49J/",
+  "quality": "720p"  // Optional, defaults to "best"
+}</code></pre>
+
+                        <h4>Response</h4>
+                        <pre><code>{
+  "status": "success",
+  "video_info": {
+    "title": "Amazing Facebook Video",
+    "duration": 25.533,
+    "thumbnail": "https://scontent-bom2-1.xx.fbcdn.net/v/example.jpg",
+    "uploader": "Video Creator",
+    "view_count": 55966,
+    "upload_date": "20250816"
+  },
+  "download_url": "https://video-bom2-2.xx.fbcdn.net/o1/example-video.mp4",
+  "available_formats": [
+    {
+      "quality": "720p",
+      "format_id": "1104755525084258v",
+      "ext": "mp4",
+      "filesize": null,
+      "url": "https://video-bom2-2.xx.fbcdn.net/o1/example-format.mp4"
+    },
+    // Additional formats...
+  ]
+}</code></pre>
+                    </div>
+
+                    <div id="info-endpoint" class="endpoint">
+                        <h3><span class="method method-post">POST</span> /info</h3>
+                        <p>Get Facebook video information without download URL.</p>
+
+                        <h4>Request</h4>
+                        <pre><code>{
+  "url": "https://www.facebook.com/share/v/1C6EwSc49J/"
+}</code></pre>
+
+                        <h4>Response</h4>
+                        <pre><code>{
+  "status": "success",
+  "video_info": {
+    "title": "Amazing Facebook Video",
+    "duration": 25.533,
+    "thumbnail": "https://scontent-bom2-1.xx.fbcdn.net/v/example.jpg",
+    "uploader": "Video Creator",
+    "view_count": 55966,
+    "upload_date": "20250816"
+  },
+  "available_formats": [
+    {
+      "quality": "720p",
+      "format_id": "1104755525084258v",
+      "ext": "mp4",
+      "filesize": null,
+      "url": "https://video-bom2-2.xx.fbcdn.net/o1/example-format.mp4"
+    },
+    // Additional formats...
+  ]
+}</code></pre>
+                    </div>
+
+                    <div id="qualities-endpoint" class="endpoint">
+                        <h3><span class="method method-get">GET</span> /qualities</h3>
+                        <p>Get supported video quality options.</p>
+
+                        <h4>Response</h4>
+                        <pre><code>{
+  "status": "success",
+  "qualities": ["best", "worst", "360p", "720p", "1080p"],
+  "descriptions": {
+    "best": "Best available quality",
+    "worst": "Worst available quality", 
+    "360p": "360p resolution",
+    "720p": "720p resolution",
+    "1080p": "1080p resolution"
+  }
+}</code></pre>
+                    </div>
+
+                    <div id="health-endpoint" class="endpoint">
+                        <h3><span class="method method-get">GET</span> /health</h3>
+                        <p>Health check endpoint.</p>
+
+                        <h4>Response</h4>
+                        <pre><code>{
+  "status": "healthy",
+  "version": "1.0.0",
+  "service": "Facebook Video Downloader API"
+}</code></pre>
+                    </div>
+                </section>
+
+                <section id="error-handling" class="mb-5">
+                    <h2>Error Handling</h2>
+                    <p>The API uses standard HTTP status codes and returns detailed error messages.</p>
+
+                    <h4>Common Error Responses</h4>
+                    <pre><code>{
+  "status": "error",
+  "message": "Invalid Facebook URL provided",
+  "error_code": "INVALID_REQUEST"
+}</code></pre>
+
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Status Code</th>
+                                    <th>Error Code</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>400</td>
+                                    <td>INVALID_REQUEST</td>
+                                    <td>Invalid request parameters or URL</td>
+                                </tr>
+                                <tr>
+                                    <td>404</td>
+                                    <td>NOT_FOUND</td>
+                                    <td>Video not found</td>
+                                </tr>
+                                <tr>
+                                    <td>429</td>
+                                    <td>RATE_LIMITED</td>
+                                    <td>Too many requests</td>
+                                </tr>
+                                <tr>
+                                    <td>500</td>
+                                    <td>PROCESSING_ERROR</td>
+                                    <td>Server-side processing error</td>
+                                </tr>
+                                <tr>
+                                    <td>500</td>
+                                    <td>INTERNAL_ERROR</td>
+                                    <td>Unhandled server error</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="url-formats" class="mb-5">
+                    <h2>Supported URL Formats</h2>
+                    <p>The API supports the following Facebook video URL formats:</p>
+
+                    <ul>
+                        <li><code>https://www.facebook.com/watch/?v=1234567890</code></li>
+                        <li><code>https://www.facebook.com/username/videos/1234567890</code></li>
+                        <li><code>https://www.facebook.com/video.php?v=1234567890</code></li>
+                        <li><code>https://fb.watch/abcdef123</code></li>
+                        <li><code>https://www.facebook.com/reel/1234567890</code></li>
+                        <li><code>https://www.facebook.com/username/posts/1234567890</code></li>
+                        <li><code>https://www.facebook.com/share/v/1C6EwSc49J/</code> (New format)</li>
+                    </ul>
+                </section>
+
+                <section id="examples" class="mb-5">
+                    <h2>Code Examples</h2>
+
+                    <h4>cURL</h4>
+                    <pre><code>curl -X POST "https://api.example.com/download" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.facebook.com/share/v/1C6EwSc49J/", "quality": "720p"}'</code></pre>
+
+                    <h4>Python</h4>
+                    <pre><code>import requests
+
+response = requests.post(
+    'https://api.example.com/download',
+    json={
+        'url': 'https://www.facebook.com/share/v/1C6EwSc49J/',
+        'quality': 'best'
+    }
+)
+
+data = response.json()
+print(f"Download URL: {data['download_url']}")</code></pre>
+
+                    <h4>JavaScript</h4>
+                    <pre><code>fetch('https://api.example.com/download', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    url: 'https://www.facebook.com/share/v/1C6EwSc49J/',
+    quality: 'best'
+  })
+})
+.then(response => response.json())
+.then(data => {
+  console.log('Download URL:', data.download_url);
+});</code></pre>
+                </section>
+
+                <section id="browser-access" class="mb-5">
+                    <h2>Browser Access</h2>
+                    <p>While most API endpoints require a POST request with a JSON body, you can access the following endpoints directly in your browser:</p>
+
+                    <h4>Direct Browser URI Access</h4>
+                    <ul>
+                        <li><a href="/health" target="_blank">Health Check</a>: <code>/health</code></li>
+                        <li><a href="/qualities" target="_blank">Quality Options</a>: <code>/qualities</code></li>
+                    </ul>
+
+                    <h4>Browser Interface</h4>
+                    <p>For POST endpoints like <code>/download</code> and <code>/info</code>, you can use our browser interface:</p>
+                    <div class="d-grid gap-2 col-md-6 mx-auto">
+                        <a href="browser.html" class="btn btn-primary">Open Browser Interface</a>
+                    </div>
+                    <p class="mt-3">The browser interface provides a user-friendly way to interact with the API without writing code. Just paste your Facebook video URL, select a quality option, and get download links.</p>
+                    
+                    <h4 class="mt-4">Direct URI Access</h4>
+                    <p>You can also create direct URI links with URL parameters that can be shared or bookmarked:</p>
+                    <div class="d-grid gap-2 col-md-6 mx-auto">
+                        <a href="direct.html" class="btn btn-primary">Create Direct URI Links</a>
+                    </div>
+                    <p class="mt-3">Example direct URI:</p>
+                    <pre><code>direct.html?url=https://www.facebook.com/share/v/1C6EwSc49J/&quality=best&api=http://localhost:8000</code></pre>
+                </section>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Facebook Video Downloader API &copy; 2025</p>
+            <p class="text-muted">This API is for educational purposes. Use responsibly and respect Facebook's terms of service.</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
