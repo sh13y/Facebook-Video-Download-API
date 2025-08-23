@@ -44,3 +44,17 @@ server.log
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Downloaded videos (for testing)
+*.mp4
+*.webm
+*.mkv
+*.avi
+
+# Logs
+*.log
+server.log
+
+# Temporary files
+*.tmp
+*.temp

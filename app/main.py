@@ -1,7 +1,20 @@
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 import logging
+import sys
+from contextlib import asynccontextmanager
+
+from app.config import settings
+from app.models import (
+    VideoDownloadRequest, 
+    VideoDownloadResponse, 
+    ErrorResponse,
+    VideoQuality
+)
+from app.services.video_service import video_service
+from app.utils.rate_limiter import check_rate_limit
 import sys
 from contextlib import asynccontextmanager
 
@@ -42,9 +55,12 @@ app = FastAPI(
     version=settings.API_VERSION,
     description=settings.API_DESCRIPTION,
     lifespan=lifespan,
-    docs_url="/docs" if settings.DEBUG else None,
-    redoc_url="/redoc" if settings.DEBUG else None,
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Add CORS middleware
 app.add_middleware(
@@ -68,6 +84,13 @@ async def global_exception_handler(request: Request, exc: Exception):
             "error_code": "INTERNAL_ERROR"
         }
     )
+
+# Root endpoint - serve the main page
+@app.get("/")
+async def root():
+    """Serve the main HTML page"""
+    from fastapi.responses import FileResponse
+    return FileResponse("static/index.html")
 
 # Health check endpoint
 @app.get("/health")

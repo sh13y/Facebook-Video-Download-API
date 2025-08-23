@@ -1,131 +1,272 @@
 # 🎥 Facebook Video Downloader API
 
-A production-ready REST API for downloading Facebook videos built with FastAPI and yt-dlp.
+[![Made in Ceylon](https://img.shields.io/badge/Made%20in-Ceylon%20🇱🇰-ff6b35?style=for-the-badge)](https://github.com/sh13y)
+[![License](https://img.shields.io/badge/License-WPFTL-blue.svg?style=for-the-badge)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ed?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
+
+A production-ready REST API and web interface for downloading Facebook videos with high-quality audio support. Built with FastAPI and yt-dlp, featuring a modern responsive web GUI.
 
 ## ✨ Features
 
-- **Fast & Reliable**: Built with FastAPI for high performance
-- **Multiple Quality Options**: Support for 360p, 720p, 1080p, best, and worst quality
-- **Rate Limiting**: Built-in protection against abuse
-- **Error Handling**: Comprehensive error handling and validation
-- **Docker Support**: Easy deployment with Docker
-- **Production Ready**: Logging, health checks, and monitoring
-- **Wide URL Support**: Works with all Facebook video URL formats, including the new share/v/ format
+- **🚀 Fast & Reliable**: Built with FastAPI for high performance
+- **🎵 Audio Support**: Automatic video+audio merging for Facebook's DASH streams  
+- **📱 Responsive GUI**: Modern web interface with Tailwind CSS
+- **🔧 Multiple Quality Options**: Support for 360p, 720p, 1080p, best, and worst quality
+- **🛡️ Rate Limiting**: Built-in protection against abuse
+- **📊 Comprehensive Logging**: Error handling and monitoring
+- **🐳 Docker Support**: Easy deployment with Docker
+- **🌐 Wide URL Support**: Works with all Facebook video URL formats
+
+## 🌟 Live Demo
+
+Visit the web interface at: [Your deployed URL]
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.11+ 
 - ffmpeg (for video processing)
-- yt-dlp 2025.8.20 or later (for supporting all URL formats)
+- yt-dlp 2025.8.20+ (automatically installed)
 
-### Local Development
+### 🐳 Docker Deployment (Recommended)
 
-1. **Clone and setup**:
 ```bash
-git clone <your-repo>
-cd facebook-video-downloader
-pip install -r requirements.txt
+# Clone the repository
+git clone https://github.com/sh13y/Facebook-Video-Download-API.git
+cd Facebook-Video-Download-API
+
+# Run with Docker Compose
+docker-compose up -d
+
+# Access the application
+# Web Interface: http://localhost:8000
+# API Documentation: http://localhost:8000/docs
 ```
 
-2. **Install ffmpeg**:
+### 🔧 Local Development
+
 ```bash
+# Clone and setup
+git clone https://github.com/sh13y/Facebook-Video-Download-API.git
+cd Facebook-Video-Download-API
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Install ffmpeg
 # Ubuntu/Debian
 sudo apt update && sudo apt install ffmpeg
 
 # macOS
 brew install ffmpeg
 
-# Windows
-# Download from https://ffmpeg.org/download.html
-```
+# Windows - Download from https://ffmpeg.org/download.html
 
-3. **Run the API**:
-```bash
-# Development mode
+# Run the application
 python -m app.main
-
-# Or with uvicorn
+# or
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-4. **Test the API**:
+## 📖 Usage
+
+### Web Interface
+
+1. Open `http://localhost:8000` in your browser
+2. Paste a Facebook video URL
+3. Select your preferred quality
+4. Click "Download Video"
+5. Download starts automatically
+
+### API Usage
+
+#### Download Video
+
 ```bash
 curl -X POST "http://localhost:8000/download" \
   -H "Content-Type: application/json" \
-  -d '{"url": "https://www.facebook.com/share/v/1C6EwSc49J/", "quality": "best"}'
+  -d '{
+    "url": "https://www.facebook.com/share/v/17GS54EKBN/",
+    "quality": "best"
+  }'
 ```
 
-### Docker Deployment
+#### Response
 
-1. **Build and run with Docker**:
-```bash
-# Build image
-docker build -t facebook-video-api .
-
-# Run container
-docker run -p 8000:8000 facebook-video-api
-```
-
-2. **Or use Docker Compose**:
-```bash
-docker-compose up -d
-```
-
-## 📖 API Documentation
-
-### Online Documentation
-A detailed API documentation is available as a GitHub Pages site at:
-```
-https://your-github-username.github.io/facebook-video-downloader-api/
-```
-
-### Browser Interface
-A browser-based interface is available for easy access to the API:
-```
-https://your-github-username.github.io/facebook-video-downloader-api/browser.html
-```
-
-### Direct URI Access
-You can create shareable links with URL parameters that can be used directly in a browser:
-```
-https://your-github-username.github.io/facebook-video-downloader-api/direct.html?url=https://www.facebook.com/share/v/1C6EwSc49J/&quality=best&api=http://localhost:8000
-```
-
-You can also use direct browser URI access for the following GET endpoints:
-- Health check: `http://localhost:8000/health`
-- Quality options: `http://localhost:8000/qualities`
-
-### Base URL
-```
-http://localhost:8000
-```
-
-### Supported URL Formats
-
-The API supports the following Facebook video URL formats:
-
-- `https://www.facebook.com/watch/?v=1234567890`
-- `https://www.facebook.com/username/videos/1234567890`
-- `https://www.facebook.com/video.php?v=1234567890`
-- `https://fb.watch/abcdef123`
-- `https://www.facebook.com/reel/1234567890`
-- `https://www.facebook.com/username/posts/1234567890`
-- `https://www.facebook.com/share/v/1C6EwSc49J/` (New format)
-
-### Endpoints
-
-#### `POST /download`
-Download Facebook video and get direct download link.
-
-**Request Body**:
 ```json
 {
-  "url": "https://www.facebook.com/watch/?v=1234567890",
-  "quality": "720p"
+  "status": "success",
+  "video_info": {
+    "title": "Video Title",
+    "duration": 828,
+    "thumbnail": "https://...",
+    "uploader": "Channel Name", 
+    "view_count": 1000000
+  },
+  "download_url": "https://direct-download-link.mp4",
+  "available_formats": [...]
 }
 ```
+
+## 🔧 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Web interface |
+| POST | `/download` | Download video with URL |
+| POST | `/info` | Get video info only |
+| GET | `/qualities` | List supported qualities |
+| GET | `/health` | Health check |
+| GET | `/docs` | API documentation |
+
+## ⚙️ Configuration
+
+Environment variables:
+
+```env
+# Server Configuration
+HOST=0.0.0.0
+PORT=8000
+DEBUG=false
+
+# Rate Limiting
+RATE_LIMIT_REQUESTS=10
+RATE_LIMIT_WINDOW=60
+
+# Download Settings
+DOWNLOAD_TIMEOUT=30
+```
+
+## 🛠️ Supported Video URLs
+
+- `https://www.facebook.com/user/videos/123456789/`
+- `https://www.facebook.com/share/v/abc123/`
+- `https://www.facebook.com/watch/?v=123456789`
+- `https://fb.watch/abc123/`
+
+## 🐛 Troubleshooting
+
+### Common Issues & Solutions
+
+#### ❌ **Problem**: Video downloads without audio
+
+**💡 Solution**: This was a major issue we solved! Facebook uses DASH streaming which separates video and audio streams.
+
+**Technical Details**:
+- Facebook serves video and audio as separate streams
+- Our solution automatically detects and merges both streams using ffmpeg
+- Updated format selector: `best[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best`
+
+**Fix Applied**:
+```python
+# Before (video only)
+'format': 'best[ext=mp4]/best'
+
+# After (video + audio merged)  
+'format': 'best[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+```
+
+#### ❌ **Problem**: "No video formats found" error
+
+**💡 Solution**: Update yt-dlp to the latest version
+
+```bash
+pip install --upgrade yt-dlp
+```
+
+#### ❌ **Problem**: ffmpeg not found
+
+**💡 Solution**: Install ffmpeg on your system
+
+```bash
+# Ubuntu/Debian
+sudo apt install ffmpeg
+
+# macOS  
+brew install ffmpeg
+
+# Windows - Download from https://ffmpeg.org/
+```
+
+#### ❌ **Problem**: Rate limit exceeded
+
+**💡 Solution**: Wait for the rate limit window to reset (default: 60 seconds)
+
+#### ❌ **Problem**: Invalid Facebook URL
+
+**💡 Solution**: Ensure the URL is a direct Facebook video link, not a post link
+
+### Debug Mode
+
+Enable debug mode for detailed logging:
+
+```bash
+export DEBUG=true
+python -m app.main
+```
+
+## 🏗️ Architecture
+
+```
+├── app/
+│   ├── main.py              # FastAPI application
+│   ├── config.py            # Configuration settings
+│   ├── models.py            # Pydantic models
+│   ├── services/
+│   │   └── video_service.py # Video download logic
+│   └── utils/
+│       ├── rate_limiter.py  # Rate limiting
+│       └── validators.py    # URL validation
+├── static/
+│   ├── index.html          # Web interface
+│   └── script.js           # Frontend JavaScript
+├── docker-compose.yml      # Docker deployment
+├── Dockerfile             # Container configuration
+└── requirements.txt       # Python dependencies
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📜 License
+
+This project is licensed under **WPFTL (WTFPL)** - see the [LICENSE](LICENSE) file for details.
+
+**TL;DR**: Do whatever you want with this code! 🎉
+
+## 🙏 Acknowledgments
+
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - The amazing tool that powers video extraction
+- [FastAPI](https://fastapi.tiangolo.com/) - For the incredible web framework
+- [Tailwind CSS](https://tailwindcss.com/) - For the beautiful UI components
+
+## 📞 Support
+
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/sh13y/Facebook-Video-Download-API/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/sh13y/Facebook-Video-Download-API/discussions)
+- 📧 **Contact**: [GitHub Profile](https://github.com/sh13y)
+
+## 🏆 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=sh13y/Facebook-Video-Download-API&type=Date)](https://star-history.com/#sh13y/Facebook-Video-Download-API&Date)
+
+---
+
+<div align="center">
+
+**Made in Ceylon 🇱🇰 with ❤️ by [sh13y](https://github.com/sh13y)**
+
+*If you found this project helpful, please give it a ⭐!*
+
+</div>
 
 **Response**:
 ```json

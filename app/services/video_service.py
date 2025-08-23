@@ -21,6 +21,13 @@ class VideoDownloadService:
             'fragment_retries': 3,
             'ignoreerrors': False,
             'no_check_certificate': True,
+            # Ensure proper audio merging for Facebook videos
+            'format': 'best[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'merge_output_format': 'mp4',
+            'postprocessors': [{
+                'key': 'FFmpegVideoConvertor',
+                'preferedformat': 'mp4',
+            }],
         }
     
     async def get_video_info(self, url: str, quality: VideoQuality = VideoQuality.BEST) -> Dict[str, Any]:
@@ -54,17 +61,17 @@ class VideoDownloadService:
         # Configure yt-dlp options based on quality
         opts = self.ydl_opts.copy()
         
-        # Set format selector based on quality
+        # Set format selector based on quality - with proper audio merging
         if quality == VideoQuality.BEST:
-            opts['format'] = 'best[ext=mp4]/best'
+            opts['format'] = 'best[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
         elif quality == VideoQuality.WORST:
-            opts['format'] = 'worst[ext=mp4]/worst'
+            opts['format'] = 'worst[ext=mp4]+bestaudio[ext=m4a]/worst[ext=mp4]/worst'
         elif quality == VideoQuality.P360:
-            opts['format'] = 'best[height<=360][ext=mp4]/best[height<=360]'
+            opts['format'] = 'best[height<=360][ext=mp4]+bestaudio[ext=m4a]/best[height<=360][ext=mp4]/best[height<=360]'
         elif quality == VideoQuality.P720:
-            opts['format'] = 'best[height<=720][ext=mp4]/best[height<=720]'
+            opts['format'] = 'best[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]/best[height<=720]'
         elif quality == VideoQuality.P1080:
-            opts['format'] = 'best[height<=1080][ext=mp4]/best[height<=1080]'
+            opts['format'] = 'best[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080][ext=mp4]/best[height<=1080]'
         
         with yt_dlp.YoutubeDL(opts) as ydl:
             # Extract video information

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Video Downloader - Made in Ceylon 🇱🇰</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fab fa-facebook text-3xl"></i>
+                    <h1 class="text-2xl font-bold">Facebook Video Downloader</h1>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm opacity-90">Made in Ceylon 🇱🇰 with ❤️</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Download Form -->
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-lg shadow-lg p-8 card-hover">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Download Facebook Videos</h2>
+                    <p class="text-gray-600">Enter a Facebook video URL and select your preferred quality</p>
+                </div>
+
+                <form id="downloadForm" class="space-y-6">
+                    <!-- URL Input -->
+                    <div>
+                        <label for="videoUrl" class="block text-sm font-medium text-gray-700 mb-2">
+                            Facebook Video URL
+                        </label>
+                        <div class="relative">
+                            <input
+                                type="url"
+                                id="videoUrl"
+                                placeholder="https://www.facebook.com/share/v/..."
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                required
+                            >
+                            <i class="fas fa-link absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                    </div>
+
+                    <!-- Quality Selection -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Video Quality</label>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                                <input type="radio" name="quality" value="best" checked class="mr-2">
+                                <span class="text-sm font-medium">Best</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                                <input type="radio" name="quality" value="1080p" class="mr-2">
+                                <span class="text-sm font-medium">1080p</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                                <input type="radio" name="quality" value="720p" class="mr-2">
+                                <span class="text-sm font-medium">720p</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                                <input type="radio" name="quality" value="360p" class="mr-2">
+                                <span class="text-sm font-medium">360p</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                                <input type="radio" name="quality" value="worst" class="mr-2">
+                                <span class="text-sm font-medium">Worst</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Download Button -->
+                    <button
+                        type="submit"
+                        id="downloadBtn"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <i class="fas fa-download mr-2"></i>
+                        Download Video
+                    </button>
+                </form>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden text-center py-8">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="mt-2 text-gray-600">Processing your video...</p>
+                </div>
+
+                <!-- Results -->
+                <div id="results" class="hidden mt-8 p-6 bg-green-50 border border-green-200 rounded-lg">
+                    <h3 class="text-lg font-bold text-green-800 mb-4">Video Ready!</h3>
+                    <div id="videoInfo" class="space-y-2 mb-4">
+                        <!-- Video info will be populated here -->
+                    </div>
+                    <a
+                        id="downloadLink"
+                        href="#"
+                        class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-colors"
+                        download
+                    >
+                        <i class="fas fa-download mr-2"></i>
+                        Download Now
+                    </a>
+                </div>
+
+                <!-- Error State -->
+                <div id="errorState" class="hidden mt-8 p-6 bg-red-50 border border-red-200 rounded-lg">
+                    <h3 class="text-lg font-bold text-red-800 mb-2">Error</h3>
+                    <p id="errorMessage" class="text-red-600"></p>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="grid md:grid-cols-3 gap-6 mt-12">
+                <div class="bg-white rounded-lg shadow-lg p-6 text-center card-hover">
+                    <i class="fas fa-bolt text-3xl text-blue-600 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Fast & Reliable</h3>
+                    <p class="text-gray-600">Built with FastAPI for high performance video processing</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6 text-center card-hover">
+                    <i class="fas fa-cog text-3xl text-green-600 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Multiple Qualities</h3>
+                    <p class="text-gray-600">Support for 360p, 720p, 1080p, best, and worst quality</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6 text-center card-hover">
+                    <i class="fas fa-shield-alt text-3xl text-purple-600 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Rate Limited</h3>
+                    <p class="text-gray-600">Built-in protection against abuse with proper error handling</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-sm">Made in Ceylon 🇱🇰 with ❤️ by <a href="https://github.com/sh13y" class="text-blue-400 hover:text-blue-300">sh13y</a></p>
+                    <p class="text-xs text-gray-400 mt-1">Licensed under WPFTL</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="https://github.com/sh13y/Facebook-Video-Download-API" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="/docs" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-book text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
