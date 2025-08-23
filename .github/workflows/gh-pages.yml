@@ -21,22 +21,51 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Generate API Documentation
+        run: |
+          # Start the FastAPI server in background to extract OpenAPI schema
+          python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          SERVER_PID=$!
+          
+          # Wait for server to start
+          sleep 5
+          
+          # Extract OpenAPI schema
+          curl -s http://localhost:8000/openapi.json > openapi.json
+          
+          # Stop the server
+          kill $SERVER_PID
           
       - name: Create Documentation Site
         run: |
           # Create docs directory structure
           mkdir -p docs/assets
           mkdir -p docs/api
+          mkdir -p docs/interactive
           
           # Copy main documentation files
           cp README.md docs/index.md
-          cp API_DOCS.md docs/api/index.md
+          cp API_DOCS.md docs/api/manual.md
           cp DEPLOYMENT_GUIDE.md docs/deployment.md
           cp PROBLEMS_AND_SOLUTIONS.md docs/troubleshooting.md
+          
+          # Copy OpenAPI schema
+          cp openapi.json docs/api/openapi.json
           
           # Copy assets if they exist
           if [ -d "assets" ]; then
@@ -47,6 +76,94 @@ jobs:
           if [ -d "static" ]; then
             cp -r static docs/demo
           fi
+          
+          # Create interactive API documentation page
+          cat > docs/api/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Facebook Video Downloader API - Interactive Documentation</title>
+              <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
+              <style>
+                  html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; overflow-y: scroll; }
+                  *, *:before, *:after { box-sizing: inherit; }
+                  body { margin:0; background: #fafafa; }
+                  .swagger-ui .topbar { display: none; }
+                  .custom-header {
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white;
+                      padding: 20px;
+                      text-align: center;
+                  }
+                  .custom-header h1 { margin: 0; font-size: 2rem; }
+                  .custom-header p { margin: 10px 0 0 0; opacity: 0.9; }
+                  .live-demo-btn {
+                      display: inline-block;
+                      background: rgba(255,255,255,0.2);
+                      color: white;
+                      padding: 10px 20px;
+                      border-radius: 5px;
+                      text-decoration: none;
+                      margin: 10px 5px;
+                      border: 1px solid rgba(255,255,255,0.3);
+                      transition: all 0.3s;
+                  }
+                  .live-demo-btn:hover {
+                      background: rgba(255,255,255,0.3);
+                      color: white;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="custom-header">
+                  <h1>🎥 Facebook Video Downloader API</h1>
+                  <p>Interactive API Documentation & Testing Interface</p>
+                  <a href="https://facebook-video-download-api.onrender.com/" class="live-demo-btn" target="_blank">
+                      🚀 Try Live API
+                  </a>
+                  <a href="../" class="live-demo-btn">
+                      📚 Documentation Home
+                  </a>
+              </div>
+              <div id="swagger-ui"></div>
+              
+              <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
+              <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"></script>
+              <script>
+              window.onload = function() {
+                const ui = SwaggerUIBundle({
+                  url: './openapi.json',
+                  dom_id: '#swagger-ui',
+                  deepLinking: true,
+                  presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                  ],
+                  plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                  ],
+                  layout: "StandaloneLayout",
+                  tryItOutEnabled: true,
+                  defaultModelsExpandDepth: 1,
+                  defaultModelExpandDepth: 1,
+                  servers: [
+                    {
+                      url: 'https://facebook-video-download-api.onrender.com',
+                      description: 'Production Server'
+                    },
+                    {
+                      url: 'http://localhost:8000',
+                      description: 'Local Development'
+                    }
+                  ]
+                })
+              }
+              </script>
+          </body>
+          </html>
+          EOF
           
           # Create a simple HTML wrapper for better GitHub Pages experience
           cat > docs/index.html << 'EOF'
@@ -105,7 +222,8 @@ jobs:
               <div class="nav-links">
                   <strong>📚 Documentation:</strong>
                   <a href="#" onclick="loadDoc('index.md')">🏠 Home</a>
-                  <a href="#" onclick="loadDoc('api/index.md')">📖 API Docs</a>
+                  <a href="api/" target="_blank">📖 Interactive API Docs</a>
+                  <a href="#" onclick="loadDoc('api/manual.md')">� API Manual</a>
                   <a href="#" onclick="loadDoc('deployment.md')">🚀 Deployment</a>
                   <a href="#" onclick="loadDoc('troubleshooting.md')">🔧 Troubleshooting</a>
                   <a href="demo/" target="_blank">🎯 Live Demo</a>
@@ -115,8 +233,11 @@ jobs:
                   <a href="https://facebook-video-download-api.onrender.com/" class="live-demo-btn" target="_blank">
                       🚀 Try Live App
                   </a>
-                  <a href="https://facebook-video-download-api.onrender.com/docs" class="live-demo-btn" target="_blank">
+                  <a href="api/" class="live-demo-btn" target="_blank">
                       📖 Interactive API Docs
+                  </a>
+                  <a href="https://facebook-video-download-api.onrender.com/docs" class="live-demo-btn" target="_blank">
+                      ⚡ FastAPI Docs
                   </a>
               </div>
               
