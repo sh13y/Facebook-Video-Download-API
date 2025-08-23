@@ -104,11 +104,21 @@ class FacebookVideoDownloader {
         // Set download link with streaming endpoint
         const videoId = this.generateVideoId(data.video_info.title);
         const streamUrl = `/stream/${videoId}?url=${encodeURIComponent(data.download_url)}`;
-        downloadLink.href = streamUrl;
-        downloadLink.download = this.generateFileName(data.video_info.title);
+        const fileName = this.generateFileName(data.video_info.title);
         
-        // Remove the custom onclick handler - use native download
-        downloadLink.onclick = null;
+        downloadLink.href = streamUrl;
+        downloadLink.download = fileName;
+        downloadLink.target = '_blank'; // Force new tab if download fails
+        
+        // Add click handler to ensure download works properly
+        downloadLink.onclick = (e) => {
+            // Let the browser handle the download naturally first
+            // If that fails, the target="_blank" will open in new tab
+            console.log('Download triggered:', streamUrl);
+            
+            // Optional: You can add tracking or analytics here
+            return true; // Allow default behavior
+        };
         
         this.results.classList.remove('hidden');
         this.resetButton();

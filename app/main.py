@@ -200,7 +200,10 @@ async def stream_video(video_id: str, url: str):
             generate(),
             media_type="video/mp4",
             headers={
-                "Content-Disposition": f"attachment; filename={video_id}.mp4"
+                "Content-Disposition": f"attachment; filename=\"{video_id}.mp4\"",
+                "Content-Type": "video/mp4",
+                "Cache-Control": "no-cache",
+                "Access-Control-Expose-Headers": "Content-Disposition"
             }
         )
         
