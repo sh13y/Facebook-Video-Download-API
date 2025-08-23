@@ -57,9 +57,9 @@ class FacebookVideoDownloader {
     
     isValidFacebookUrl(url) {
         const facebookUrlPatterns = [
-            /^https?:\/\/(www\.)?facebook\.com\/.*\/videos\/.*$/,
-            /^https?:\/\/(www\.)?facebook\.com\/watch\/.*$/,
-            /^https?:\/\/(www\.)?facebook\.com\/share\/v\/.*$/,
+            // Standard Facebook domains
+            /^https?:\/\/(www\.|web\.|m\.)?facebook\.com\/.*$/,
+            // Short URLs
             /^https?:\/\/fb\.watch\/.*$/
         ];
         

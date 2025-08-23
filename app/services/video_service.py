@@ -13,14 +13,20 @@ class VideoDownloadService:
     
     def __init__(self):
         self.ydl_opts = {
-            'quiet': not settings.DEBUG,
-            'no_warnings': not settings.DEBUG,
-            'extract_flat': False,
-            'socket_timeout': settings.DOWNLOAD_TIMEOUT,
-            'retries': 3,
-            'fragment_retries': 3,
+            'quiet': True,
+            'no_warnings': False,
+            'extractaudio': False,
+            'audioformat': 'mp3',
+            'outtmpl': '/tmp/%(title)s.%(ext)s',
+            'retries': 5,  # Increased retries for redirect issues
+            'fragment_retries': 5,
             'ignoreerrors': False,
             'no_check_certificate': True,
+            # Handle redirects and cookies better
+            'cookiefile': None,
+            'extract_flat': False,
+            # Add user agent to avoid blocking
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             # Ensure proper audio merging for Facebook videos
             'format': 'best[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
             'merge_output_format': 'mp4',
@@ -40,6 +46,10 @@ class VideoDownloadService:
         # Normalize URL
         normalized_url = URLValidator.normalize_url(url)
         
+        # Special handling for fb.watch URLs - try to resolve redirects
+        if 'fb.watch' in normalized_url:
+            normalized_url = await self._resolve_fb_watch_url(normalized_url)
+        
         try:
             # Run yt-dlp in a thread to avoid blocking
             loop = asyncio.get_event_loop()
@@ -54,6 +64,30 @@ class VideoDownloadService:
         except Exception as e:
             logger.error(f"Error extracting video info: {str(e)}")
             raise ValueError(f"Failed to extract video information: {str(e)}")
+    
+    async def _resolve_fb_watch_url(self, url: str) -> str:
+        """Resolve fb.watch URLs to full Facebook URLs"""
+        import aiohttp
+        
+        try:
+            timeout = aiohttp.ClientTimeout(total=10)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                # Follow redirects manually to get the final URL
+                async with session.get(
+                    url, 
+                    allow_redirects=False,
+                    headers={
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
+                ) as response:
+                    if response.status in [301, 302, 303, 307, 308]:
+                        redirect_url = response.headers.get('Location', url)
+                        if 'facebook.com' in redirect_url:
+                            return redirect_url
+                    return url
+        except Exception as e:
+            logger.warning(f"Could not resolve fb.watch URL: {str(e)}, using original")
+            return url
     
     def _extract_info(self, url: str, quality: VideoQuality) -> Dict[str, Any]:
         """Extract video information using yt-dlp (runs in thread)"""
@@ -73,14 +107,32 @@ class VideoDownloadService:
         elif quality == VideoQuality.P1080:
             opts['format'] = 'best[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080][ext=mp4]/best[height<=1080]'
         
-        with yt_dlp.YoutubeDL(opts) as ydl:
-            # Extract video information
-            info = ydl.extract_info(url, download=False)
-            
-            if not info:
-                raise ValueError("No video information found")
-            
-            return self._process_video_info(info)
+        try:
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                # Extract video information
+                info = ydl.extract_info(url, download=False)
+                
+                if not info:
+                    raise ValueError("No video information found")
+                
+                return self._process_video_info(info)
+                
+        except yt_dlp.DownloadError as e:
+            error_msg = str(e)
+            if "redirect loop" in error_msg.lower():
+                raise ValueError("Video URL has redirect issues. Try copying the direct Facebook video URL instead of using fb.watch links.")
+            elif "private" in error_msg.lower() or "not available" in error_msg.lower():
+                raise ValueError("This video is private or not available for download.")
+            elif "age" in error_msg.lower():
+                raise ValueError("This video has age restrictions and cannot be downloaded.")
+            else:
+                raise ValueError(f"Could not extract video: {error_msg}")
+        except Exception as e:
+            error_msg = str(e)
+            if "302" in error_msg:
+                raise ValueError("URL redirect issue. Please try using the direct Facebook video URL instead of fb.watch.")
+            else:
+                raise ValueError(f"Unexpected error: {error_msg}")
     
     def _process_video_info(self, info: Dict[str, Any]) -> Dict[str, Any]:
         """Process and structure video information"""
