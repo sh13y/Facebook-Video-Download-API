@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: facebook-video-downloader
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DEBUG
+        value: false
+      - key: RATE_LIMIT_REQUESTS
+        value: 10
+      - key: RATE_LIMIT_WINDOW
+        value: 60
+      - key: DOWNLOAD_TIMEOUT
+        value: 30
+    healthCheckPath: /health

@@ -21,7 +21,14 @@ A production-ready REST API and web interface for downloading Facebook videos wi
 
 ## 🌟 Live Demo
 
-Visit the web interface at: [Your deployed URL]
+**Deploy your own instance on:**
+- [Railway](https://railway.app) - `https://your-app.railway.app`
+- [Render](https://render.com) - `https://your-app.onrender.com`
+- [Fly.io](https://fly.io) - `https://your-app.fly.dev`
+
+**Quick Deploy Links:**
+- [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/your-template)
+- [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
 
 ## 🚀 Quick Start
 
@@ -70,6 +77,44 @@ python -m app.main
 # or
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+
+### 🌐 Free Hosting Deployment
+
+#### **Render** ⭐ (Recommended for FastAPI)
+1. Go to [Render.com](https://render.com) → New Web Service
+2. Connect GitHub repo
+3. **Build Command**: `pip install -r requirements.txt`
+4. **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+5. Set environment variables: `DEBUG=false`
+6. Deploy → Live at: `https://your-app.onrender.com`
+
+#### **Railway**
+1. Push code to GitHub
+2. Go to [Railway.app](https://railway.app) → New Project → Deploy from GitHub
+3. Select your repo and deploy
+4. Set environment variables: `DEBUG=false`, `RATE_LIMIT_REQUESTS=10`
+5. Your app will be live at: `https://your-app.railway.app`
+
+#### **Fly.io** (Docker)
+```bash
+# Install flyctl CLI
+curl -L https://fly.io/install.sh | sh
+
+# Deploy
+flyctl launch
+flyctl deploy
+```
+
+#### **Netlify** (Serverless Functions)
+```bash
+# Using Netlify CLI
+npm install -g netlify-cli
+netlify login
+netlify deploy --prod --dir=static --functions=netlify/functions
+```
+**Note**: Limited to 10-second execution time, may not work for large videos.
+
+**🎯 Recommendation**: Use Railway or Render for full functionality, Netlify for frontend-only deployments.
 
 ## 📖 Usage
 

@@ -1,0 +1,12 @@
+# Railway deployment configuration
+
+[build]
+command = "pip install -r requirements.txt"
+
+[deploy]
+startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+
+[env]
+DEBUG = "false"
+RATE_LIMIT_REQUESTS = "10"
+RATE_LIMIT_WINDOW = "60"
