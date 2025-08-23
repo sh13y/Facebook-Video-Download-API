@@ -1,10 +1,14 @@
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 import logging
 import sys
 from contextlib import asynccontextmanager
+import aiohttp
+import tempfile
+import os
+from urllib.parse import urlparse
 
 from app.config import settings
 from app.models import (
@@ -156,6 +160,53 @@ async def download_video(
                 "error_code": "PROCESSING_ERROR"
             }
         )
+
+# Streaming download endpoint  
+@app.get("/stream/{video_id}")
+async def stream_video(video_id: str, url: str):
+    """
+    Stream video file directly through our server to avoid CORS issues
+    """
+    try:
+        logger.info(f"Streaming video: {url}")
+        
+        # Validate URL
+        parsed_url = urlparse(url)
+        if not parsed_url.scheme or not parsed_url.netloc:
+            raise HTTPException(status_code=400, detail="Invalid URL")
+        
+        async def generate():
+            timeout = aiohttp.ClientTimeout(total=600)  # 10 minutes timeout
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                try:
+                    async with session.get(
+                        url, 
+                        headers={
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                        }
+                    ) as response:
+                        if response.status != 200:
+                            raise HTTPException(status_code=response.status, detail="Failed to fetch video")
+                        
+                        chunk_size = 8192
+                        async for chunk in response.content.iter_chunked(chunk_size):
+                            yield chunk
+                            
+                except Exception as e:
+                    logger.error(f"Streaming error: {str(e)}")
+                    raise
+        
+        return StreamingResponse(
+            generate(),
+            media_type="video/mp4",
+            headers={
+                "Content-Disposition": f"attachment; filename={video_id}.mp4"
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Stream error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to stream video")
 
 # Get video info without download
 @app.post("/info", response_model=VideoDownloadResponse)

@@ -101,9 +101,14 @@ class FacebookVideoDownloader {
             </div>
         `;
         
-        // Set download link
-        downloadLink.href = data.download_url;
+        // Set download link with streaming endpoint
+        const videoId = this.generateVideoId(data.video_info.title);
+        const streamUrl = `/stream/${videoId}?url=${encodeURIComponent(data.download_url)}`;
+        downloadLink.href = streamUrl;
         downloadLink.download = this.generateFileName(data.video_info.title);
+        
+        // Remove the custom onclick handler - use native download
+        downloadLink.onclick = null;
         
         this.results.classList.remove('hidden');
         this.resetButton();
@@ -161,6 +166,17 @@ class FacebookVideoDownloader {
             .substring(0, 50); // Limit length
             
         return `${cleanTitle}.mp4`;
+    }
+    
+    generateVideoId(title) {
+        if (!title) return 'facebook_video';
+        
+        // Create a simple ID from title
+        return title
+            .replace(/[^\w\s-]/g, '') // Remove special characters
+            .replace(/\s+/g, '_') // Replace spaces with underscores
+            .toLowerCase()
+            .substring(0, 30); // Limit length
     }
 }
 
