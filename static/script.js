@@ -108,16 +108,31 @@ class FacebookVideoDownloader {
         
         downloadLink.href = streamUrl;
         downloadLink.download = fileName;
-        downloadLink.target = '_blank'; // Force new tab if download fails
         
-        // Add click handler to ensure download works properly
+        // Force download on click by opening in new window
         downloadLink.onclick = (e) => {
-            // Let the browser handle the download naturally first
-            // If that fails, the target="_blank" will open in new tab
-            console.log('Download triggered:', streamUrl);
+            e.preventDefault();
             
-            // Optional: You can add tracking or analytics here
-            return true; // Allow default behavior
+            // Show downloading state
+            downloadLink.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Downloading...';
+            downloadLink.style.pointerEvents = 'none';
+            
+            // Open the download URL in a new window/tab
+            // This forces the browser to treat it as a download
+            const downloadWindow = window.open(streamUrl, '_blank');
+            
+            // Reset button after a short delay
+            setTimeout(() => {
+                downloadLink.innerHTML = '<i class="fas fa-download mr-2"></i>Download Now';
+                downloadLink.style.pointerEvents = '';
+                
+                // Close the download window if it's still open (some browsers keep it open)
+                if (downloadWindow) {
+                    downloadWindow.close();
+                }
+            }, 2000);
+            
+            return false;
         };
         
         this.results.classList.remove('hidden');
