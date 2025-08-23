@@ -1,4 +1,4 @@
-name: Deploy API Documentation to GitHub Pages
+name: Deploy Documentation to GitHub Pages
 
 on:
   push:
@@ -15,20 +15,153 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Create Documentation Site
+        run: |
+          # Create docs directory structure
+          mkdir -p docs/assets
+          mkdir -p docs/api
+          
+          # Copy main documentation files
+          cp README.md docs/index.md
+          cp API_DOCS.md docs/api/index.md
+          cp DEPLOYMENT_GUIDE.md docs/deployment.md
+          cp PROBLEMS_AND_SOLUTIONS.md docs/troubleshooting.md
+          
+          # Copy assets if they exist
+          if [ -d "assets" ]; then
+            cp -r assets/* docs/assets/
+          fi
+          
+          # Copy static files for demo
+          if [ -d "static" ]; then
+            cp -r static docs/demo
+          fi
+          
+          # Create a simple HTML wrapper for better GitHub Pages experience
+          cat > docs/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Facebook Video Downloader API - Documentation</title>
+              <meta name="description" content="Professional Facebook video downloader with API and web interface. Download videos with audio merging support.">
+              <link href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css" rel="stylesheet">
+              <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
+              <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+              <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/5.1.1/marked.min.js"></script>
+              <style>
+                  body { 
+                      max-width: 1000px; 
+                      margin: 0 auto; 
+                      padding: 20px; 
+                      font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;
+                  }
+                  .live-demo-btn {
+                      display: inline-block;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white;
+                      padding: 12px 24px;
+                      border-radius: 8px;
+                      text-decoration: none;
+                      font-weight: bold;
+                      margin: 10px 5px;
+                      transition: transform 0.2s;
+                  }
+                  .live-demo-btn:hover {
+                      transform: translateY(-2px);
+                      color: white;
+                  }
+                  .nav-links {
+                      background: #f8f9fa;
+                      padding: 20px;
+                      border-radius: 8px;
+                      margin-bottom: 30px;
+                  }
+                  .nav-links a {
+                      display: inline-block;
+                      margin-right: 15px;
+                      color: #0366d6;
+                      text-decoration: none;
+                      font-weight: 500;
+                  }
+                  .nav-links a:hover {
+                      text-decoration: underline;
+                  }
+              </style>
+          </head>
+          <body class="markdown-body">
+              <div class="nav-links">
+                  <strong>📚 Documentation:</strong>
+                  <a href="#" onclick="loadDoc('index.md')">🏠 Home</a>
+                  <a href="#" onclick="loadDoc('api/index.md')">📖 API Docs</a>
+                  <a href="#" onclick="loadDoc('deployment.md')">🚀 Deployment</a>
+                  <a href="#" onclick="loadDoc('troubleshooting.md')">🔧 Troubleshooting</a>
+                  <a href="demo/" target="_blank">🎯 Live Demo</a>
+              </div>
+              
+              <div style="text-align: center; margin-bottom: 30px;">
+                  <a href="https://facebook-video-download-api.onrender.com/" class="live-demo-btn" target="_blank">
+                      🚀 Try Live App
+                  </a>
+                  <a href="https://facebook-video-download-api.onrender.com/docs" class="live-demo-btn" target="_blank">
+                      📖 Interactive API Docs
+                  </a>
+              </div>
+              
+              <div id="content"></div>
+              
+              <script>
+                  async function loadDoc(filename) {
+                      try {
+                          const response = await fetch(filename);
+                          const markdown = await response.text();
+                          const html = marked.parse(markdown);
+                          document.getElementById('content').innerHTML = html;
+                          hljs.highlightAll();
+                          
+                          // Update URL without page reload
+                          window.history.pushState({}, '', '?doc=' + filename);
+                      } catch (error) {
+                          console.error('Error loading document:', error);
+                      }
+                  }
+                  
+                  // Load initial document
+                  const urlParams = new URLSearchParams(window.location.search);
+                  const docToLoad = urlParams.get('doc') || 'index.md';
+                  loadDoc(docToLoad);
+              </script>
+          </body>
+          </html>
+          EOF
+          
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: 'docs'
+          
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    needs: build-docs
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: '.'
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v3
