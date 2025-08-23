@@ -168,12 +168,18 @@ class FacebookVideoDownloader {
         
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
-        const remainingSeconds = seconds % 60;
+        const remainingSeconds = Math.floor(seconds % 60);
         
         if (hours > 0) {
-            return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            // For videos longer than 1 hour: "1:30:45 Hours"
+            return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')} Hours`;
+        } else if (minutes > 0) {
+            // For videos longer than 1 minute: "5:30 Min"
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')} Min`;
+        } else {
+            // For videos less than 1 minute: "45 Sec"
+            return `${remainingSeconds} Sec`;
         }
-        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
     
     formatNumber(num) {
