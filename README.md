@@ -99,6 +99,18 @@ This isn't just another video downloader. It's the result of:
 **📖 API Documentation:** [https://facebook-video-download-api.onrender.com/docs](https://facebook-video-download-api.onrender.com/docs)
 > *Interactive docs that are more fun than reading terms & conditions*
 
+### 📱 **Mobile Demo in Action**
+
+*"See it to believe it! From paste to download in seconds"* ⚡
+
+<div align="center">
+
+![Mobile Demo](assets/mobile-demo.gif)
+
+*🎬 **Watch the magic happen**: Paste any Facebook video link → Get instant download → Enjoy offline! Works perfectly on mobile devices.*
+
+</div>
+
 ---
 
 ## � Supported URL Formats
