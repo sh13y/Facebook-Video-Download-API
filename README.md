@@ -101,7 +101,54 @@ This isn't just another video downloader. It's the result of:
 
 ---
 
-## 📚 Complete Documentation Suite
+## � Supported URL Formats
+
+*"We speak all dialects of Facebook!"* 🗣️
+
+Our service supports **all major Facebook URL formats**, including the tricky ones:
+
+### ✅ **Standard Facebook URLs**
+```
+https://www.facebook.com/watch/?v=1234567890
+https://facebook.com/username/videos/1234567890
+https://www.facebook.com/video.php?v=1234567890
+https://web.facebook.com/watch/?v=1234567890
+```
+
+### ✅ **Mobile Facebook URLs**
+```
+https://m.facebook.com/watch/?v=1234567890
+https://m.facebook.com/story.php?story_fbid=...
+```
+
+### ✅ **Facebook Reels**
+```
+https://www.facebook.com/reel/1234567890
+https://facebook.com/username/videos/1234567890  (Reels)
+```
+
+### ✅ **Short URLs (fb.watch)**
+```
+https://fb.watch/BFC-iErR4Y/
+https://fb.watch/ABC123def/
+```
+
+### 💡 **Pro Tips for fb.watch URLs**
+
+*fb.watch* URLs are mobile-friendly short links, but they can be a bit finicky:
+
+- **✅ Best Practice**: If a fb.watch URL doesn't work, follow these steps:
+  1. **Open the fb.watch link** in your browser
+  2. **Copy the full URL** from the address bar (should be facebook.com/...)
+  3. **Use that URL instead** - it'll work perfectly!
+
+- **🎯 Why?** fb.watch URLs are redirects, and sometimes they get lost in translation. The full Facebook URL is always more reliable!
+
+- **📱 Mobile Users**: When you share a video from the Facebook app, you often get fb.watch URLs. Just follow the steps above for best results!
+
+---
+
+## �📚 Complete Documentation Suite
 
 We believe in documentation more than we believe in coffee ☕ (and that's saying something!):
 

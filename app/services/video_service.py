@@ -66,25 +66,63 @@ class VideoDownloadService:
             raise ValueError(f"Failed to extract video information: {str(e)}")
     
     async def _resolve_fb_watch_url(self, url: str) -> str:
-        """Resolve fb.watch URLs to full Facebook URLs"""
+        """Resolve fb.watch URLs to full Facebook URLs with multiple redirect handling"""
         import aiohttp
         
         try:
-            timeout = aiohttp.ClientTimeout(total=10)
+            timeout = aiohttp.ClientTimeout(total=15)
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+            }
+            
             async with aiohttp.ClientSession(timeout=timeout) as session:
-                # Follow redirects manually to get the final URL
-                async with session.get(
-                    url, 
-                    allow_redirects=False,
-                    headers={
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                    }
-                ) as response:
-                    if response.status in [301, 302, 303, 307, 308]:
-                        redirect_url = response.headers.get('Location', url)
-                        if 'facebook.com' in redirect_url:
-                            return redirect_url
-                    return url
+                current_url = url
+                max_redirects = 5
+                redirect_count = 0
+                
+                while redirect_count < max_redirects:
+                    try:
+                        async with session.get(
+                            current_url, 
+                            allow_redirects=False,
+                            headers=headers
+                        ) as response:
+                            # If it's a redirect response
+                            if response.status in [301, 302, 303, 307, 308]:
+                                redirect_url = response.headers.get('Location')
+                                if redirect_url:
+                                    # Handle relative redirects
+                                    if redirect_url.startswith('/'):
+                                        from urllib.parse import urljoin
+                                        redirect_url = urljoin(current_url, redirect_url)
+                                    
+                                    # Check if we got a Facebook URL
+                                    if 'facebook.com' in redirect_url:
+                                        logger.info(f"Resolved fb.watch URL: {url} -> {redirect_url}")
+                                        return redirect_url
+                                    
+                                    current_url = redirect_url
+                                    redirect_count += 1
+                                else:
+                                    break
+                            else:
+                                # No more redirects, check if current URL is Facebook
+                                if 'facebook.com' in current_url:
+                                    return current_url
+                                break
+                    except Exception as e:
+                        logger.warning(f"Error during redirect {redirect_count}: {str(e)}")
+                        break
+                
+                # If we couldn't resolve to a facebook.com URL, return original
+                logger.warning(f"Could not resolve fb.watch URL to facebook.com: {url}")
+                return url
+                
         except Exception as e:
             logger.warning(f"Could not resolve fb.watch URL: {str(e)}, using original")
             return url
@@ -119,8 +157,11 @@ class VideoDownloadService:
                 
         except yt_dlp.DownloadError as e:
             error_msg = str(e)
-            if "redirect loop" in error_msg.lower():
-                raise ValueError("Video URL has redirect issues. Try copying the direct Facebook video URL instead of using fb.watch links.")
+            if "redirect loop" in error_msg.lower() or "redirect" in error_msg.lower():
+                if 'fb.watch' in url:
+                    raise ValueError("fb.watch URL couldn't be processed. Please try: 1) Open the video on Facebook, 2) Copy the full facebook.com URL from the address bar, 3) Use that URL instead.")
+                else:
+                    raise ValueError("Video URL has redirect issues. Try copying the direct Facebook video URL.")
             elif "private" in error_msg.lower() or "not available" in error_msg.lower():
                 raise ValueError("This video is private or not available for download.")
             elif "age" in error_msg.lower():
@@ -129,8 +170,11 @@ class VideoDownloadService:
                 raise ValueError(f"Could not extract video: {error_msg}")
         except Exception as e:
             error_msg = str(e)
-            if "302" in error_msg:
-                raise ValueError("URL redirect issue. Please try using the direct Facebook video URL instead of fb.watch.")
+            if "302" in error_msg or "redirect" in error_msg.lower():
+                if 'fb.watch' in url:
+                    raise ValueError("fb.watch URL needs the full Facebook URL. Please: 1) Open the video on Facebook, 2) Copy the complete facebook.com URL, 3) Try again.")
+                else:
+                    raise ValueError("URL redirect issue. Please try using the direct Facebook video URL.")
             else:
                 raise ValueError(f"Unexpected error: {error_msg}")
     
