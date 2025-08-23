@@ -21,14 +21,9 @@ A production-ready REST API and web interface for downloading Facebook videos wi
 
 ## 🌟 Live Demo
 
-**Deploy your own instance on:**
-- [Railway](https://railway.app) - `https://your-app.railway.app`
-- [Render](https://render.com) - `https://your-app.onrender.com`
-- [Fly.io](https://fly.io) - `https://your-app.fly.dev`
+**✨ Try it now:** [https://facebook-video-download-api.onrender.com/](https://facebook-video-download-api.onrender.com/)
 
-**Quick Deploy Links:**
-- [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/your-template)
-- [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+**📖 API Documentation:** [https://facebook-video-download-api.onrender.com/docs](https://facebook-video-download-api.onrender.com/docs)
 
 ## 🚀 Quick Start
 
@@ -272,6 +267,25 @@ python -m app.main
 ├── Dockerfile             # Container configuration
 └── requirements.txt       # Python dependencies
 ```
+
+## 🚀 Deploy Your Own
+
+Want to deploy your own instance? Here's how:
+
+### **Render (Recommended)**
+
+1. **Fork this repository** to your GitHub account
+2. **Sign up at [Render](https://render.com)** with your GitHub account  
+3. **Create a new Web Service** and connect your forked repository
+4. **Use these settings**:
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Environment Variables**:
+     - `DEBUG=false`
+     - `PYTHON_VERSION=3.11.9`
+5. **Deploy** and your app will be live in ~5 minutes! 🎉
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
 
 ## 🤝 Contributing
 
