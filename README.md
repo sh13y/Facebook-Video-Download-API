@@ -66,6 +66,16 @@ curl -X POST "https://facebook-video-download-api.onrender.com/info" \
      -d '{"url": "YOUR_FACEBOOK_VIDEO_URL"}'
 ```
 
+### Mobile Demo
+
+<div align="center">
+
+![Mobile Demo](assets/mobile-demo.gif)
+
+*Mobile interface demonstration: Paste Facebook video URL → Select quality → Download*
+
+</div>
+
 ## Technical Architecture
 
 ### Backend Stack
