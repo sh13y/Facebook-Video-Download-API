@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-green.svg)](https://fastapi.tiangolo.com)
 [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://docker.com)
-[![Live Demo](https://img.shields.io/badge/Demo-Live-success.svg)](https://facebook-video-download-api.onrender.com)
+[![Live Demo](https://img.shields.io/badge/Demo-Live-success.svg)](https://fdown.isuru.eu.org)
 
 A production-ready REST API and web interface for downloading Facebook videos with audio support. Built with FastAPI, yt-dlp, and modern web technologies for reliable video extraction and processing.
 
@@ -53,15 +53,15 @@ Facebook videos often use separate audio and video streams (DASH format), making
 
 ## Live Demo
 
-**Web Interface**: [https://facebook-video-download-api.onrender.com](https://facebook-video-download-api.onrender.com)
+**Web Interface**: [https://fdown.isuru.eu.org](https://fdown.isuru.eu.org)
 
-**API Documentation**: [https://facebook-video-download-api.onrender.com/docs](https://facebook-video-download-api.onrender.com/docs)
+**API Documentation**: [https://fdown.isuru.eu.org/docs](https://fdown.isuru.eu.org/docs)
 
 **GitHub Pages**: [https://sh13y.github.io/Facebook-Video-Download-API](https://sh13y.github.io/Facebook-Video-Download-API)
 
 ### Quick Test
 ```bash
-curl -X POST "https://facebook-video-download-api.onrender.com/info" \
+curl -X POST "https://fdown.isuru.eu.org/info" \
      -H "Content-Type: application/json" \
      -d '{"url": "YOUR_FACEBOOK_VIDEO_URL"}'
 ```
