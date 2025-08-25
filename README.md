@@ -1,103 +1,358 @@
-# 🎥 Facebook Video Downloader API
+# Facebook Video Downloader API
 
-[![Made in Ceylon](https://img.shields.io/badge/Made%20in-Ceylon%20🇱🇰-ff6b35?style=for-the-badge)](https://github.com/sh13y)
-[![License](https://img.shields.io/badge/License-WPFTL-blue.svg?style=for-the-badge)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.11+-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ed?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
+[![License](https://img.shields.io/badge/License-WTFPL-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-green.svg)](https://fastapi.tiangolo.com)
+[![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://docker.com)
+[![Live Demo](https://img.shields.io/badge/Demo-Live-success.svg)](https://facebook-video-download-api.onrender.com)
 
-> *"Because sometimes you just need that perfect Facebook video for your meme collection... or your business presentation. We don't judge!"* 😏
+A production-ready REST API and web interface for downloading Facebook videos with audio support. Built with FastAPI, yt-dlp, and modern web technologies for reliable video extraction and processing.
 
-A **production-ready** REST API and sleek web interface for downloading Facebook videos with crystal-clear audio support. Built with modern tech stack: **FastAPI** + **yt-dlp** + a dash of engineering magic ✨.
+## Table of Contents
 
-*Fun fact: This started because Facebook's "Save Video" feature was as reliable as weather predictions. So we built something that actually works!* 🌩️
+- [Overview](#overview)
+- [Features](#features)
+- [Live Demo](#live-demo)
+- [Technical Architecture](#technical-architecture)
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Documentation](#api-documentation)
+- [Deployment](#deployment)
+- [Project Evolution](#project-evolution)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Overview
+
+This project provides a robust solution for downloading Facebook videos programmatically. The system handles Facebook's complex video streaming formats, including DASH streams that require audio and video merging, making it suitable for both developers and end-users.
+
+### Key Problem Solved
+
+Facebook videos often use separate audio and video streams (DASH format), making direct downloads challenging. This API automatically detects and merges these streams using FFmpeg, ensuring downloaded videos include both audio and video components.
+
+## Features
+
+### Core Functionality
+- **Video Download**: Extract and download Facebook videos in multiple quality options
+- **Audio Merging**: Automatic handling of DASH streams with audio/video synchronization
+- **Format Support**: MP4 output with quality selection (360p, 720p, 1080p, best, worst)
+- **URL Flexibility**: Support for various Facebook URL formats including fb.watch short links
+
+### Technical Features
+- **RESTful API**: Clean HTTP API with comprehensive endpoint documentation
+- **Rate Limiting**: Built-in protection against abuse (10 requests per 60 seconds per IP)
+- **Error Handling**: Detailed error responses with actionable user guidance
+- **Web Interface**: Responsive frontend for non-technical users
+- **Docker Support**: Containerized deployment with all dependencies included
+
+### Quality Options
+- `best`: Highest available quality with audio
+- `worst`: Lowest quality for faster downloads
+- `360p`, `720p`, `1080p`: Specific resolution targets
+- Automatic fallback to best available quality if requested resolution unavailable
+
+## Live Demo
+
+**Web Interface**: [https://facebook-video-download-api.onrender.com](https://facebook-video-download-api.onrender.com)
+
+**API Documentation**: [https://facebook-video-download-api.onrender.com/docs](https://facebook-video-download-api.onrender.com/docs)
+
+**GitHub Pages**: [https://sh13y.github.io/Facebook-Video-Download-API](https://sh13y.github.io/Facebook-Video-Download-API)
+
+### Quick Test
+```bash
+curl -X POST "https://facebook-video-download-api.onrender.com/info" \
+     -H "Content-Type: application/json" \
+     -d '{"url": "YOUR_FACEBOOK_VIDEO_URL"}'
+```
+
+## Technical Architecture
+
+### Backend Stack
+- **FastAPI**: Modern Python web framework for API development
+- **yt-dlp**: Robust video extraction library with Facebook support
+- **FFmpeg**: Video processing for stream merging and format conversion
+- **Pydantic**: Data validation and serialization
+- **aiohttp**: Asynchronous HTTP client for URL resolution
+
+### Frontend Stack
+- **Vanilla JavaScript**: Lightweight, dependency-free frontend
+- **Tailwind CSS**: Utility-first CSS framework for responsive design
+- **Responsive Design**: Mobile-first approach supporting all screen sizes
+
+### Infrastructure
+- **Docker**: Containerization with multi-stage builds
+- **Render**: Production hosting with automatic deployments
+- **GitHub Actions**: CI/CD pipeline for documentation and testing
+
+## Installation
+
+### Prerequisites
+- Python 3.11 or higher
+- FFmpeg installed on system
+- Git for cloning the repository
+
+### Method 1: Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/sh13y/Facebook-Video-Download-API.git
+cd Facebook-Video-Download-API
+
+# Build and run with Docker Compose
+docker-compose up -d
+
+# Access the application
+# Web Interface: http://localhost:8000
+# API Documentation: http://localhost:8000/docs
+```
+
+### Method 2: Local Development
+
+```bash
+# Clone the repository
+git clone https://github.com/sh13y/Facebook-Video-Download-API.git
+cd Facebook-Video-Download-API
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### FFmpeg Installation
+
+**Ubuntu/Debian:**
+```bash
+sudo apt update && sudo apt install ffmpeg
+```
+
+**macOS:**
+```bash
+brew install ffmpeg
+```
+
+**Windows:**
+Download from [FFmpeg official website](https://ffmpeg.org/download.html) or use package managers like Chocolatey.
+
+## Usage
+
+### Web Interface
+
+1. Navigate to the web interface at `http://localhost:8000`
+2. Paste a Facebook video URL in the input field
+3. Select desired video quality
+4. Click "Download Video" to process and download
+
+### API Usage
+
+#### Get Video Information
+```bash
+curl -X POST "http://localhost:8000/info" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "url": "https://www.facebook.com/watch/?v=1234567890",
+       "quality": "best"
+     }'
+```
+
+#### Download Video
+```bash
+curl -X POST "http://localhost:8000/download" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "url": "https://www.facebook.com/watch/?v=1234567890",
+       "quality": "720p"
+     }'
+```
+
+### Supported URL Formats
+
+The API accepts various Facebook URL formats:
+
+```
+https://www.facebook.com/watch/?v=1234567890
+https://facebook.com/username/videos/1234567890
+https://m.facebook.com/watch/?v=1234567890
+https://fb.watch/ABC123/
+https://www.facebook.com/reel/1234567890
+```
+
+**Note**: For fb.watch URLs, if processing fails, copy the full Facebook URL after the redirect for better reliability.
+
+## API Documentation
+
+### Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Web interface |
+| GET | `/health` | Health check |
+| POST | `/info` | Get video information |
+| POST | `/download` | Download video |
+| GET | `/qualities` | List supported qualities |
+| GET | `/stream/{video_id}` | Stream video file |
+
+### Response Format
+
+**Success Response:**
+```json
+{
+  "status": "success",
+  "video_info": {
+    "title": "Video Title",
+    "duration": 120,
+    "thumbnail": "https://example.com/thumb.jpg",
+    "uploader": "Page Name",
+    "view_count": 1000,
+    "upload_date": "20240101"
+  },
+  "download_url": "https://example.com/video.mp4",
+  "available_formats": [...]
+}
+```
+
+**Error Response:**
+```json
+{
+  "status": "error",
+  "message": "Invalid Facebook URL provided",
+  "error_code": "INVALID_REQUEST"
+}
+```
+
+### Rate Limiting
+
+- **Limit**: 10 requests per 60 seconds per IP address
+- **Headers**: Rate limit information included in response headers
+- **Behavior**: Returns 429 status code when limit exceeded
+
+## Deployment
+
+### Production Deployment on Render
+
+1. Fork this repository
+2. Connect your GitHub account to Render
+3. Create a new Web Service
+4. Connect your forked repository
+5. Render will automatically deploy using the included `render.yaml`
+
+### Environment Variables
+
+```bash
+# Optional: Set debug mode
+DEBUG=false
+
+# Optional: Custom port
+PORT=8000
+```
+
+### Docker Deployment
+
+```bash
+# Build the image
+docker build -t facebook-video-downloader .
+
+# Run the container
+docker run -p 8000:8000 facebook-video-downloader
+```
+
+## Project Evolution
+
+This project evolved through several phases, each addressing specific technical challenges and user needs:
+
+### Phase 1: Core Functionality
+**Challenge**: Basic video extraction without audio
+- Implemented yt-dlp integration for Facebook video extraction
+- Discovered Facebook's DASH stream architecture separating audio/video
+- **Solution**: Integrated FFmpeg for automatic stream merging
+
+### Phase 2: Web Interface Development
+**Challenge**: Making the API accessible to non-technical users
+- Developed responsive web interface using Tailwind CSS
+- Implemented real-time feedback and error handling
+- **Solution**: Progressive enhancement with mobile-first design
+
+### Phase 3: URL Compatibility
+**Challenge**: Supporting Facebook's diverse URL formats
+- Researched Facebook's URL structure variations
+- Implemented comprehensive regex patterns for URL validation
+- **Solution**: Built URL normalization system handling redirects
+
+### Phase 4: Production Readiness
+**Challenge**: Deploying a reliable service for public use
+- Implemented rate limiting and error handling
+- Added comprehensive logging and monitoring
+- **Solution**: Containerized deployment with auto-scaling capabilities
+
+### Phase 5: Developer Experience
+**Challenge**: Providing clear documentation and testing capabilities
+- Created comprehensive API documentation
+- Built interactive testing interface
+- **Solution**: Multi-format documentation with live examples
+
+### Current Status
+
+| Component | Status | Description |
+|-----------|--------|-------------|
+| **Core API** | Production Ready | Stable video extraction with error handling |
+| **Web Interface** | Production Ready | Responsive design supporting all devices |
+| **Documentation** | Complete | API docs, deployment guides, troubleshooting |
+| **Deployment** | Automated | Docker containers with CI/CD pipeline |
+| **Testing** | Interactive | Live API testing through documentation |
+
+## Contributing
+
+Contributions are welcome! Please read our contributing guidelines:
+
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+3. **Commit** your changes: `git commit -m 'Add amazing feature'`
+4. **Push** to the branch: `git push origin feature/amazing-feature`
+5. **Open** a Pull Request
+
+### Development Setup
+
+```bash
+# Install development dependencies
+pip install -r requirements.txt
+
+# Run tests
+python -m pytest
+
+# Run with auto-reload for development
+uvicorn app.main:app --reload
+```
+
+### Code Style
+
+- Follow PEP 8 for Python code
+- Use type hints for all function parameters and return values
+- Write descriptive commit messages
+- Include tests for new features
+
+## License
+
+This project is licensed under the WTFPL (Do What The F*** You Want To Public License) - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)**: Robust video extraction library
+- **[FastAPI](https://fastapi.tiangolo.com/)**: Modern Python web framework
+- **[FFmpeg](https://ffmpeg.org/)**: Video processing capabilities
+- **[Tailwind CSS](https://tailwindcss.com/)**: Utility-first CSS framework
 
 ---
 
-## ✨ Features That'll Make You Go "Wow!"
+**Built with ❤️ by [sh13y](https://github.com/sh13y)**
 
-- **🚀 Lightning Fast**: FastAPI under the hood - because nobody has time to wait
-- **🎵 Audio Magic**: Automatically merges video+audio streams (Facebook's DASH format tried to trick us, but we're smarter!)
-- **📱 Gorgeous UI**: Responsive web interface that works on everything from phones to 4K monitors
-- **🎯 Quality Options**: 360p to 1080p - from "good enough for WhatsApp" to "cinematic masterpiece"
-- **🛡️ Bulletproof**: Rate limiting, error handling, and logging - because crashes are for cars, not APIs
-- **🐳 Docker Ready**: One command deployment - easier than making instant noodles
-- **🌐 URL Flexibility**: Handles all Facebook URL formats - we speak fluent Facebook
-
----
-
-## 🚀 The Epic Development Journey
-
-*"From 'it doesn't work' to 'it's production ready' - a tale of debugging, coffee, and persistence!"*
-
-### 📈 Evolution Timeline
-
-**🌱 Day 1**: *"Hey, can you help me download this Facebook video?"*
-- **Challenge**: Simple codebase exploration + audio merge debugging
-- **Status**: Videos downloaded but with no sound 🔇
-- **Developer Mood**: Confused but optimistic 🤔
-
-**🔧 Day 2-3**: *"Let's make this thing actually work!"*
-- **Challenge**: Audio merging with DASH streams + clean GUI creation
-- **Breakthrough**: Discovered Facebook uses separate audio/video streams
-- **Solution**: ffmpeg magic for seamless merging ✨
-- **Developer Mood**: Slightly caffeinated and determined ☕
-
-**📱 Day 4-5**: *"Mobile users exist too!"*
-- **Challenge**: URL validation gaps + mobile responsiveness
-- **Discovery**: Facebook has like 47 different URL formats 🤯
-- **Solution**: Regex wizardry + responsive Tailwind CSS
-- **Developer Mood**: Getting excited about the potential 🚀
-
-**🎨 Day 6-7**: *"Let's make it beautiful!"*
-- **Challenge**: Professional documentation + deployment readiness
-- **Achievement**: Complete documentation suite + GitHub metadata
-- **Solution**: README badges, API docs, deployment guides
-- **Developer Mood**: Full perfectionist mode activated 📝
-
-**🌐 Day 8**: *"Deploy all the things!"*
-- **Challenge**: Production deployment on Render
-- **Victory**: Live demo working flawlessly
-- **Achievement**: Docker containerization + automatic deployments
-- **Developer Mood**: Proud parent watching their code go live 👨‍💻
-
-**✨ Day 9**: *"UX matters!"*
-- **Challenge**: Download button not triggering + duration formatting
-- **Polish**: Auto-download functionality + readable time display (0:07 Min)
-- **Final Touch**: Mobile optimization + intuitive user experience
-- **Developer Mood**: Mission accomplished! 🎉
-
-### 🏆 Current Status: **PRODUCTION READY** ✅
-
-| Feature | Status | Fun Fact |
-|---------|--------|----------|
-| 🎵 **Audio Merging** | ✅ Perfect | *Facebook tried to outsmart us with DASH streams* |
-| 🔗 **URL Support** | ✅ Complete | *Supports more Facebook formats than Facebook itself* |
-| 📱 **Mobile UI** | ✅ Responsive | *Works on everything from iPhone 4 to 8K monitors* |
-| ⬇️ **Download UX** | ✅ Seamless | *One click = instant download (no right-click needed!)* |
-| ⏱️ **Duration Display** | ✅ Human-readable | *"0:07 Min" instead of "7 seconds" because we're fancy* |
-| 📚 **Documentation** | ✅ Professional | *More docs than some enterprise software* |
-| 🚀 **Deployment** | ✅ Live | *Deployed faster than we could say "production ready"* |
-
-### 🎯 What Makes This Special
-
-This isn't just another video downloader. It's the result of:
-- **47 commits** of pure determination
-- **9 documentation files** because we believe in helping others
-- **Countless hours** of debugging Facebook's ever-changing video formats
-- **One memorable conversation** that turned a simple request into a full-featured application
-
-*"Started from 'curl this URL' and now we're here!"* 🎵
-
----
-
-## 🌟 Live Demo
-
-**✨ Try it now:** [https://facebook-video-download-api.onrender.com/](https://facebook-video-download-api.onrender.com/)
-> *Go ahead, paste that video URL you've been saving "for later" since 2019* 
-
-**📖 API Documentation:** [https://facebook-video-download-api.onrender.com/docs](https://facebook-video-download-api.onrender.com/docs)
-> *Interactive docs that are more fun than reading terms & conditions*
+For questions, issues, or contributions, please visit the [GitHub repository](https://github.com/sh13y/Facebook-Video-Download-API).
+README update to trigger workflow
 
 ### 📱 **Mobile Demo in Action**
 
