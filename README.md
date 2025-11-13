@@ -362,11 +362,13 @@ This project is licensed under the WTFPL (Do What The F*** You Want To Public Li
 **Built by [sh13y](https://github.com/sh13y)**
 
 For questions, issues, or contributions, please visit the [GitHub repository](https://github.com/sh13y/Facebook-Video-Download-API).
-```bash
-# Install flyctl CLI
-curl -L https://fly.io/install.sh | sh
 
+# Install flyctl CLI
+```bash
+curl -L https://fly.io/install.sh | sh
+```
 # Deploy
+```
 flyctl launch
 flyctl deploy
 ```
@@ -377,6 +379,7 @@ flyctl deploy
 npm install -g netlify-cli
 netlify login
 netlify deploy --prod --dir=static --functions=netlify/functions
+```
 ## 📖 How To Use This Magic
 
 ### 🖥️ Web Interface (For Humans)
@@ -526,7 +529,7 @@ brew install ffmpeg
 - Consider downloading smaller videos first
 
 # Windows - Download from https://ffmpeg.org/
-```
+
 
 ### 🚨 **Problem**: Rate limit exceeded
 
