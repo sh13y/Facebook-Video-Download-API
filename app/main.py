@@ -126,10 +126,11 @@ async def download_video(
         
         # Extract video information
         result = await video_service.get_video_info(
-            str(request.url), 
-            request.quality
+            str(request.url),
+            request.quality,
+            request.cookies,
         )
-        
+
         response = VideoDownloadResponse(
             status="success",
             video_info=result['video_info'],
@@ -229,10 +230,11 @@ async def get_video_info(
         logger.info(f"Processing video info request: {request.url}")
         
         result = await video_service.get_video_info(
-            str(request.url), 
-            request.quality
+            str(request.url),
+            request.quality,
+            request.cookies,
         )
-        
+
         response = VideoDownloadResponse(
             status="success",
             video_info=result['video_info'],

@@ -12,12 +12,20 @@ class VideoQuality(str, Enum):
 class VideoDownloadRequest(BaseModel):
     url: HttpUrl
     quality: Optional[VideoQuality] = VideoQuality.BEST
-    
+    cookies: Optional[str] = None
+    """
+    Netscape-format cookie string for authenticated downloads.
+    Export from your browser using the 'Get cookies.txt LOCALLY' extension,
+    then paste the file contents here to access age-restricted or
+    login-required Facebook videos.
+    """
+
     class Config:
         schema_extra = {
             "example": {
                 "url": "https://www.facebook.com/watch/?v=1234567890",
-                "quality": "720p"
+                "quality": "720p",
+                "cookies": "# Netscape HTTP Cookie File\n.facebook.com TRUE / FALSE 0 c_user 123456789\n"
             }
         }
 
