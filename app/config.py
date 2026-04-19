@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 
 class Settings:
     # API Configuration
@@ -25,6 +25,11 @@ class Settings:
     MAX_VIDEO_SIZE_MB = int(os.getenv("MAX_VIDEO_SIZE_MB", "500"))
     DOWNLOAD_TIMEOUT = int(os.getenv("DOWNLOAD_TIMEOUT", "30"))
     
+    # Cookie Authentication
+    # Path to a Netscape-format cookies file on the server (optional).
+    # Set FB_COOKIES_FILE=/path/to/cookies.txt to enable server-side auth.
+    COOKIES_FILE: Optional[str] = os.getenv("FB_COOKIES_FILE")
+
     # Environment
     DEBUG = os.getenv("DEBUG", "False").lower() == "true"
     HOST = os.getenv("HOST", "0.0.0.0")

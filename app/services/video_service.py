@@ -1,6 +1,8 @@
 import yt_dlp
 import asyncio
 import logging
+import os
+import tempfile
 from typing import Dict, List, Optional, Any
 from app.models import VideoInfo, VideoFormat, VideoQuality
 from app.utils.validators import URLValidator
@@ -36,34 +38,60 @@ class VideoDownloadService:
             }],
         }
     
-    async def get_video_info(self, url: str, quality: VideoQuality = VideoQuality.BEST) -> Dict[str, Any]:
+    async def get_video_info(
+        self,
+        url: str,
+        quality: VideoQuality = VideoQuality.BEST,
+        cookies: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Extract video information and download URLs"""
-        
+
         # Validate URL
         if not URLValidator.is_valid_facebook_url(url):
             raise ValueError("Invalid Facebook URL provided")
-        
+
         # Normalize URL
         normalized_url = URLValidator.normalize_url(url)
-        
+
         # Special handling for fb.watch URLs - try to resolve redirects
         if 'fb.watch' in normalized_url:
             normalized_url = await self._resolve_fb_watch_url(normalized_url)
-        
+
+        # Resolve which cookies file to use:
+        # 1. Per-request cookies string (written to a temp file)
+        # 2. Server-side FB_COOKIES_FILE env var
+        # 3. None (unauthenticated)
+        tmp_cookie_path: Optional[str] = None
         try:
-            # Run yt-dlp in a thread to avoid blocking
+            if cookies:
+                tmp = tempfile.NamedTemporaryFile(
+                    mode='w', suffix='.txt', delete=False, encoding='utf-8'
+                )
+                tmp.write(cookies)
+                tmp.close()
+                tmp_cookie_path = tmp.name
+                logger.info("Using per-request cookies for authenticated download")
+            elif settings.COOKIES_FILE and os.path.isfile(settings.COOKIES_FILE):
+                tmp_cookie_path = settings.COOKIES_FILE
+                logger.info(f"Using server-side cookies file: {settings.COOKIES_FILE}")
+
             loop = asyncio.get_event_loop()
             result = await loop.run_in_executor(
-                None, 
-                self._extract_info, 
-                normalized_url, 
-                quality
+                None,
+                self._extract_info,
+                normalized_url,
+                quality,
+                tmp_cookie_path,
             )
             return result
-            
+
         except Exception as e:
             logger.error(f"Error extracting video info: {str(e)}")
             raise ValueError(f"Failed to extract video information: {str(e)}")
+        finally:
+            # Clean up the temp file we created (never delete a server-side file)
+            if tmp_cookie_path and cookies and os.path.exists(tmp_cookie_path):
+                os.unlink(tmp_cookie_path)
     
     async def _resolve_fb_watch_url(self, url: str) -> str:
         """Resolve fb.watch URLs to full Facebook URLs with multiple redirect handling"""
@@ -127,11 +155,15 @@ class VideoDownloadService:
             logger.warning(f"Could not resolve fb.watch URL: {str(e)}, using original")
             return url
     
-    def _extract_info(self, url: str, quality: VideoQuality) -> Dict[str, Any]:
+    def _extract_info(
+        self, url: str, quality: VideoQuality, cookiefile: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Extract video information using yt-dlp (runs in thread)"""
-        
+
         # Configure yt-dlp options based on quality
         opts = self.ydl_opts.copy()
+        if cookiefile:
+            opts['cookiefile'] = cookiefile
         
         # Set format selector based on quality - with proper audio merging
         if quality == VideoQuality.BEST:
